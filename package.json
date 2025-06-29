@@ -10,13 +10,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/[your-username]/qwen-cli-fork.git"
+    "url": "https://github.com/dinoanderson/qwen_cli_coder.git"
   },
   "description": "Community fork of Google's Gemini CLI, modified to work with Qwen models from Alibaba Cloud",
   "keywords": ["ai", "cli", "qwen", "assistant", "coding", "gemini-fork"],
-  "homepage": "https://github.com/[your-username]/qwen-cli-fork#readme",
+  "homepage": "https://github.com/dinoanderson/qwen_cli_coder#readme",
   "bugs": {
-    "url": "https://github.com/[your-username]/qwen-cli-fork/issues"
+    "url": "https://github.com/dinoanderson/qwen_cli_coder/issues"
   },
   "config": {
     "sandboxImageUri": "us-docker.pkg.dev/qwen-code-dev/qwen-cli/sandbox:0.1.4"

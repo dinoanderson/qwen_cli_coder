@@ -1,8 +1,19 @@
 {
   "name": "@qwen/qwen-cli-core",
   "version": "0.1.5",
-  "description": "Qwen CLI Core",
+  "description": "Core library for Qwen CLI - Community fork of Google's Gemini CLI",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dinoanderson/qwen_cli_coder.git"
+  },
+  "homepage": "https://github.com/dinoanderson/qwen_cli_coder#readme",
+  "bugs": {
+    "url": "https://github.com/dinoanderson/qwen_cli_coder/issues"
+  },
+  "keywords": ["ai", "qwen", "core", "assistant", "gemini-fork"],
+  "author": "Community Fork Contributors",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/src/index.js",
