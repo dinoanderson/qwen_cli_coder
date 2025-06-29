@@ -2,7 +2,7 @@
 
 > **A community fork of Google's Gemini CLI, modified to work with Qwen models from Alibaba Cloud**
 
-![Qwen CLI Screenshot](./docs/assets/qwen-screenshot.png)
+![Qwen CLI Screenshot](./docs/assets/qwen_cli.png)
 
 This repository contains a community-maintained fork of Google's Gemini CLI, modified to work with Qwen models. It's a command-line AI workflow tool that connects to your tools, understands your code and accelerates your workflows using Qwen's powerful language models.
 
