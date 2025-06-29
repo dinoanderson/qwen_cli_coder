@@ -1,0 +1,17 @@
+{
+  "theme": "Default",
+  "language": "en",
+  "usageStatisticsEnabled": true,
+  "autoConfigureMaxOldSpaceSize": true,
+  "fileFiltering": {
+    "respectGitIgnore": true,
+    "enableRecursiveFileSearch": true
+  },
+  "mcpServers": {
+    "duckduckgo": {
+      "command": "npx",
+      "args": ["-y", "@oevortex/ddg_search"],
+      "timeout": 30000
+    }
+  }
+}

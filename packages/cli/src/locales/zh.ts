@@ -59,6 +59,10 @@ export const zhTranslations: Translations = {
       name: 'mcp',
       description: '列出已配置的MCP服务器和工具',
     },
+    'setup-mcp': {
+      name: 'setup-mcp',
+      description: '设置MCP服务器（网络搜索等）',
+    },
     chat: {
       name: 'chat',
       description: '管理对话历史。用法：/chat <list|save|resume> [标签]',
@@ -109,6 +113,9 @@ export const zhTranslations: Translations = {
     unknownCommand: '未知命令：{command}',
     errorMessage: '错误：{error}',
     infoMessage: '信息：{info}',
+    mcpSetupSuccess: 'MCP服务器配置成功！重启CLI即可使用。',
+    mcpSetupExists: 'MCP服务器 {name} 已经配置。',
+    mcpSetupFailed: '配置MCP服务器失败：{error}',
   },
   
   // Help content

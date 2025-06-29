@@ -94,6 +94,39 @@ All configuration commands now use a unified dialog pattern:
 - `/lang` - Change interface language
 - `/model` - Switch Qwen models
 
+### 🔍 Web Search Integration
+The CLI includes powerful web search capabilities through MCP (Model Context Protocol) servers:
+
+**Quick Setup:**
+```bash
+# In the CLI, run:
+/setup-mcp websearch
+```
+
+This automatically configures DuckDuckGo search for privacy-focused web search. You can then use web search in your conversations:
+
+```text
+> Search for the latest TypeScript 5.7 features and help me understand them
+```
+
+**Manual Setup (Optional):**
+If you prefer manual configuration, add to your `.qwen/settings.json`:
+```json
+{
+  "mcpServers": {
+    "duckduckgo": {
+      "command": "npx",
+      "args": ["-y", "@oevortex/ddg_search"]
+    }
+  }
+}
+```
+
+**Management Commands:**
+- `/mcp` - Check configured MCP servers and their status
+- `/setup-mcp` - Show available MCP setup options
+- `/tools` - List all available tools including web search
+
 ## Examples
 
 Once the CLI is running, you can start interacting with Qwen from your shell.

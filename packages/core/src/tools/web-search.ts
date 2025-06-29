@@ -62,13 +62,13 @@ export class WebSearchTool extends BaseTool<
   WebSearchToolParams,
   WebSearchToolResult
 > {
-  static readonly Name: string = 'google_web_search';
+  static readonly Name: string = 'web_search';
 
   constructor(private readonly config: Config) {
     super(
       WebSearchTool.Name,
-      'GoogleSearch',
-      'Performs a web search using DuckDuckGo (via MCP server) and returns the results. This tool is useful for finding information on the internet based on a query. Requires DuckDuckGo MCP server to be configured.',
+      'DuckDuckGoSearch',
+      'Performs a web search using DuckDuckGo search engine (via MCP server) and returns the results. This tool provides privacy-focused web search capabilities. Requires DuckDuckGo MCP server to be configured in settings.',
       {
         type: 'object',
         properties: {
@@ -123,18 +123,18 @@ export class WebSearchTool extends BaseTool<
       }
 
       // If no MCP tool available, return error with setup instructions
-      const setupMessage = `Web search requires a DuckDuckGo MCP server to be configured.\n\nTo enable web search:\n1. Install DuckDuckGo MCP server: \`npm install -g @nickclyde/duckduckgo-mcp-server\`\n2. Add to your .qwen/settings.json:\n\`\`\`json\n{\n  "mcpServers": {\n    "duckduckgo": {\n      "command": "npx",\n      "args": ["-y", "@nickclyde/duckduckgo-mcp-server"]\n    }\n  }\n}\n\`\`\`\n3. Restart the CLI`;
+      const setupMessage = `Web search requires a DuckDuckGo MCP server to be configured.\n\n**Quick setup:**\nUse \`/setup-mcp websearch\` to configure automatically, or:\n\n**Manual setup:**\n1. Install: \`npm install -g @oevortex/ddg_search\`\n2. Add to your .qwen/settings.json:\n\`\`\`json\n{\n  "mcpServers": {\n    "duckduckgo": {\n      "command": "npx",\n      "args": ["-y", "@oevortex/ddg_search"]\n    }\n  }\n}\n\`\`\`\n3. Restart the CLI\n\nFor more help: \`/mcp\` shows server status, \`/setup-mcp\` shows setup options.`;
       
       return {
         llmContent: `Error: ${setupMessage}`,
-        returnDisplay: 'Web search not configured. Please set up DuckDuckGo MCP server.',
+        returnDisplay: 'Web search not configured. Use `/setup-mcp websearch` to configure DuckDuckGo search.',
       };
     } catch (error: unknown) {
       const errorMessage = `Error during web search for query "${params.query}": ${getErrorMessage(error)}`;
       console.error(errorMessage, error);
       return {
         llmContent: `Error: ${errorMessage}`,
-        returnDisplay: `Error performing web search.`,
+        returnDisplay: `Error performing web search. Check if DuckDuckGo MCP server is configured and running.`,
       };
     }
   }
@@ -149,11 +149,11 @@ export class WebSearchTool extends BaseTool<
   ): Promise<WebSearchToolResult | null> {
     // Look for DuckDuckGo search tools
     const possibleToolNames = [
-      'duckduckgo_web_search', // Exact name from duckduckgo-mcp-server
+      'web_search', // Primary tool name from @oevortex/ddg_search
+      'ddg_search', // Alternative name from @oevortex/ddg_search
+      'duckduckgo_web_search', 
       'search',
       'duckduckgo_search', 
-      'web_search',
-      'ddg_search',
       'search_web'
     ];
 

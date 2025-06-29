@@ -59,6 +59,10 @@ export const enTranslations: Translations = {
       name: 'mcp',
       description: 'list configured MCP servers and tools',
     },
+    'setup-mcp': {
+      name: 'setup-mcp',
+      description: 'setup MCP servers (web search, etc.)',
+    },
     chat: {
       name: 'chat',
       description: 'Manage conversation history. Usage: /chat <list|save|resume> [tag]',
@@ -109,6 +113,9 @@ export const enTranslations: Translations = {
     unknownCommand: 'Unknown command: {command}',
     errorMessage: 'Error: {error}',
     infoMessage: 'Info: {info}',
+    mcpSetupSuccess: 'MCP server configured successfully! Restart CLI to use.',
+    mcpSetupExists: 'MCP server {name} already configured.',
+    mcpSetupFailed: 'Failed to configure MCP server: {error}',
   },
   
   // Help content

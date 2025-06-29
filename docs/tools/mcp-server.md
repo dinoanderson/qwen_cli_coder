@@ -1,22 +1,22 @@
-# MCP servers with the Gemini CLI
+# MCP servers with the Qwen CLI
 
-This document provides a guide to configuring and using Model Context Protocol (MCP) servers with the Gemini CLI.
+This document provides a guide to configuring and using Model Context Protocol (MCP) servers with the Qwen CLI.
 
 ## What is an MCP server?
 
-An MCP server is an application that exposes tools and resources to the Gemini CLI through the Model Context Protocol, allowing it to interact with external systems and data sources. MCP servers act as a bridge between the Gemini model and your local environment or other services like APIs.
+An MCP server is an application that exposes tools and resources to the Qwen CLI through the Model Context Protocol, allowing it to interact with external systems and data sources. MCP servers act as a bridge between the Qwen model and your local environment or other services like APIs.
 
-An MCP server enables the Gemini CLI to:
+An MCP server enables the Qwen CLI to:
 
 - **Discover tools:** List available tools, their descriptions, and parameters through standardized schema definitions.
 - **Execute tools:** Call specific tools with defined arguments and receive structured responses.
-- **Access resources:** Read data from specific resources (though the Gemini CLI primarily focuses on tool execution).
+- **Access resources:** Read data from specific resources (though the Qwen CLI primarily focuses on tool execution).
 
-With an MCP server, you can extend the Gemini CLI's capabilities to perform actions beyond its built-in features, such as interacting with databases, APIs, custom scripts, or specialized workflows.
+With an MCP server, you can extend the Qwen CLI's capabilities to perform actions beyond its built-in features, such as interacting with databases, APIs, custom scripts, or specialized workflows.
 
 ## Core Integration Architecture
 
-The Gemini CLI integrates with MCP servers through a sophisticated discovery and execution system built into the core package (`packages/core/src/tools/`):
+The Qwen CLI integrates with MCP servers through a sophisticated discovery and execution system built into the core package (`packages/core/src/tools/`):
 
 ### Discovery Layer (`mcp-client.ts`)
 
@@ -25,7 +25,7 @@ The discovery process is orchestrated by `discoverMcpTools()`, which:
 1. **Iterates through configured servers** from your `settings.json` `mcpServers` configuration
 2. **Establishes connections** using appropriate transport mechanisms (Stdio, SSE, or Streamable HTTP)
 3. **Fetches tool definitions** from each server using the MCP protocol
-4. **Sanitizes and validates** tool schemas for compatibility with the Gemini API
+4. **Sanitizes and validates** tool schemas for compatibility with the Qwen API
 5. **Registers tools** in the global tool registry with conflict resolution
 
 ### Execution Layer (`mcp-tool.ts`)
@@ -39,7 +39,7 @@ Each discovered MCP tool is wrapped in a `DiscoveredMCPTool` instance that:
 
 ### Transport Mechanisms
 
-The Gemini CLI supports three MCP transport types:
+The Qwen CLI supports three MCP transport types:
 
 - **Stdio Transport:** Spawns a subprocess and communicates via stdin/stdout
 - **SSE Transport:** Connects to Server-Sent Events endpoints
@@ -47,11 +47,11 @@ The Gemini CLI supports three MCP transport types:
 
 ## How to set up your MCP server
 
-The Gemini CLI uses the `mcpServers` configuration in your `settings.json` file to locate and connect to MCP servers. This configuration supports multiple servers with different transport mechanisms.
+The Qwen CLI uses the `mcpServers` configuration in your `settings.json` file to locate and connect to MCP servers. This configuration supports multiple servers with different transport mechanisms.
 
 ### Configure the MCP server in settings.json
 
-You can configure MCP servers at the global level in the `~/.gemini/settings.json` file or in your project's root directory, create or open the `.gemini/settings.json` file. Within the file, add the `mcpServers` configuration block.
+You can configure MCP servers at the global level in the `~/.qwen/settings.json` file or in your project's root directory, create or open the `.qwen/settings.json` file. Within the file, add the `mcpServers` configuration block.
 
 ### Configuration Structure
 
@@ -168,7 +168,7 @@ Each server configuration supports the following properties:
 
 ## Discovery Process Deep Dive
 
-When the Gemini CLI starts, it performs MCP server discovery through the following detailed process:
+When the Qwen CLI starts, it performs MCP server discovery through the following detailed process:
 
 ### 1. Server Iteration and Connection
 
@@ -188,7 +188,7 @@ Upon successful connection:
 
 1. **Tool listing:** The client calls the MCP server's tool listing endpoint
 2. **Schema validation:** Each tool's function declaration is validated
-3. **Name sanitization:** Tool names are cleaned to meet Gemini API requirements:
+3. **Name sanitization:** Tool names are cleaned to meet Qwen API requirements:
    - Invalid characters (non-alphanumeric, underscore, dot, hyphen) are replaced with underscores
    - Names longer than 63 characters are truncated with middle replacement (`___`)
 
@@ -202,7 +202,7 @@ When multiple servers expose tools with the same name:
 
 ### 4. Schema Processing
 
-Tool parameter schemas undergo sanitization for Gemini API compatibility:
+Tool parameter schemas undergo sanitization for Qwen API compatibility:
 
 - **`$schema` properties** are removed
 - **`additionalProperties`** are stripped
@@ -219,7 +219,7 @@ After discovery:
 
 ## Tool Execution Flow
 
-When the Gemini model decides to use an MCP tool, the following execution flow occurs:
+When the Qwen model decides to use an MCP tool, the following execution flow occurs:
 
 ### 1. Tool Invocation
 
@@ -323,7 +323,7 @@ Discovery State: COMPLETED
 
 ### Tool Usage
 
-Once discovered, MCP tools are available to the Gemini model like built-in tools. The model will automatically:
+Once discovered, MCP tools are available to the Qwen model like built-in tools. The model will automatically:
 
 1. **Select appropriate tools** based on your requests
 2. **Present confirmation dialogs** (unless the server is trusted)
@@ -421,8 +421,8 @@ The MCP integration tracks several states:
 
 ### Schema Compatibility
 
-- **Property stripping:** The system automatically removes certain schema properties (`$schema`, `additionalProperties`) for Gemini API compatibility
+- **Property stripping:** The system automatically removes certain schema properties (`$schema`, `additionalProperties`) for Qwen API compatibility
 - **Name sanitization:** Tool names are automatically sanitized to meet API requirements
 - **Conflict resolution:** Tool name conflicts between servers are resolved through automatic prefixing
 
-This comprehensive integration makes MCP servers a powerful way to extend the Gemini CLI's capabilities while maintaining security, reliability, and ease of use.
+This comprehensive integration makes MCP servers a powerful way to extend the Qwen CLI's capabilities while maintaining security, reliability, and ease of use.

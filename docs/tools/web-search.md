@@ -1,14 +1,14 @@
-# Web Search Tool (`google_web_search`)
+# Web Search Tool (`web_search`)
 
-This document describes the `google_web_search` tool, which now uses MCP (Model Context Protocol) servers for web search functionality.
+This document describes the `web_search` tool (formerly `google_web_search`), which uses MCP (Model Context Protocol) servers for web search functionality.
 
 ## Description
 
-Use `google_web_search` to perform a web search using DuckDuckGo via an MCP server. The `google_web_search` tool returns a summary of web results with sources. This tool provides privacy-focused web search capabilities without tracking users.
+Use `web_search` to perform a web search using DuckDuckGo via an MCP server. The `web_search` tool returns a summary of web results with sources. This tool provides privacy-focused web search capabilities without tracking users.
 
 ### Arguments
 
-`google_web_search` takes one argument:
+`web_search` takes one argument:
 
 - `query` (string, required): The search query.
 
@@ -21,8 +21,8 @@ Before using the web search tool, you need to configure a DuckDuckGo MCP server:
 Choose one of the available MCP servers:
 
 ```bash
-# Option 1: Nick Clyde's comprehensive implementation (Recommended)
-npm install -g @nickclyde/duckduckgo-mcp-server
+# Option 1: OeVortex's reliable implementation (Recommended)
+npm install -g @oevortex/ddg_search
 
 # Option 2: Spences10's implementation with SerpAPI support
 npm install -g @spences10/mcp-duckduckgo-search
@@ -33,14 +33,14 @@ npm install -g @gianlucamazza/mcp-duckduckgo
 
 ### 2. Configure MCP Server
 
-Add the MCP server to your `.gemini/settings.json` file:
+Add the MCP server to your `.qwen/settings.json` file:
 
 ```json
 {
   "mcpServers": {
     "duckduckgo": {
       "command": "npx",
-      "args": ["-y", "@nickclyde/duckduckgo-mcp-server"],
+      "args": ["-y", "@oevortex/ddg_search"],
       "timeout": 30000
     }
   }
@@ -82,28 +82,38 @@ Add the MCP server to your `.gemini/settings.json` file:
 
 After configuration, restart the CLI to load the MCP server.
 
-## How to use `google_web_search` 
+## Quick Setup
 
-The `google_web_search` tool automatically detects and uses the configured DuckDuckGo MCP server. If no MCP server is configured, it will provide setup instructions.
+For easy setup, you can use the built-in setup command:
+
+```
+/setup-mcp websearch
+```
+
+This will automatically configure DuckDuckGo MCP server for you.
+
+## How to use `web_search` 
+
+The `web_search` tool automatically detects and uses the configured DuckDuckGo MCP server. If no MCP server is configured, it will provide setup instructions.
 
 Usage:
 
 ```
-google_web_search(query="Your query goes here.")
+web_search(query="Your query goes here.")
 ```
 
-## `google_web_search` examples
+## `web_search` examples
 
 Get information on a topic:
 
 ```
-google_web_search(query="latest advancements in AI-powered code generation")
+web_search(query="latest advancements in AI-powered code generation")
 ```
 
 Search for specific technologies:
 
 ```
-google_web_search(query="Qwen AI model capabilities 2024")
+web_search(query="Qwen AI model capabilities 2024")
 ```
 
 ## Features
@@ -131,9 +141,10 @@ This means no DuckDuckGo MCP server is detected. Follow the setup steps above.
 ### MCP server connection issues
 
 1. Verify the MCP server is properly installed
-2. Check your `.gemini/settings.json` configuration
+2. Check your `.qwen/settings.json` configuration
 3. Restart the CLI after making changes
 4. Use `/mcp` command to check server status
+5. Use `/setup-mcp websearch` for easy configuration
 
 ### No search results
 

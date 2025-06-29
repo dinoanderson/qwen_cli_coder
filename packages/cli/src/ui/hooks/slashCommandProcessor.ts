@@ -33,7 +33,8 @@ import { createShowMemoryAction } from './useShowMemoryCommand.js';
 import { GIT_COMMIT_INFO } from '../../generated/git-commit.js';
 import { formatDuration, formatMemoryUsage } from '../utils/formatters.js';
 import { getCliVersion } from '../../utils/version.js';
-import { LoadedSettings, SettingScope } from '../../config/settings.js';
+import { LoadedSettings, SettingScope, saveSettings } from '../../config/settings.js';
+import { checkMcpConfiguration } from '../../utils/qwenInit.js';
 import { 
   setLanguage, 
   getCurrentLanguage, 
@@ -487,6 +488,115 @@ export const useSlashCommandProcessor = (
             content: message,
             timestamp: new Date(),
           });
+        },
+      },
+      {
+        name: 'setup-mcp',
+        description: t('commands.setup-mcp.description'),
+        action: async (_mainCommand, subCommand, _args) => {
+          const mcpCheck = checkMcpConfiguration();
+          
+          // If no subcommand, show available options
+          if (!subCommand) {
+            const message = `
+🔧 MCP Server Setup Options:
+
+**Available setups:**
+- \`/setup-mcp websearch\` - Configure DuckDuckGo for web search
+- \`/setup-mcp status\` - Check current MCP configuration
+
+**What are MCP servers?**
+MCP (Model Context Protocol) servers extend Qwen CLI with additional tools and capabilities.
+
+**Current status:** ${mcpCheck.hasConfiguration ? '✅ MCP servers configured' : '❌ No MCP servers configured'}
+
+Use \`/mcp\` to see configured servers and their status.
+            `.trim();
+
+            addMessage({
+              type: MessageType.INFO,
+              content: message,
+              timestamp: new Date(),
+            });
+            return;
+          }
+
+          switch (subCommand) {
+            case 'websearch':
+            case 'search':
+            case 'duckduckgo': {
+              try {
+                // Check if already configured
+                const userSettings = settings.user.settings;
+                if (userSettings.mcpServers?.duckduckgo) {
+                  addMessage({
+                    type: MessageType.INFO,
+                    content: t('messages.mcpSetupExists', { name: 'DuckDuckGo' }),
+                    timestamp: new Date(),
+                  });
+                  return;
+                }
+
+                // Configure DuckDuckGo MCP server
+                const newMcpServers = {
+                  ...userSettings.mcpServers,
+                  duckduckgo: {
+                    command: 'npx',
+                    args: ['-y', '@oevortex/ddg_search'],
+                    timeout: 30000,
+                  },
+                };
+
+                settings.setValue(SettingScope.User, 'mcpServers', newMcpServers);
+
+                addMessage({
+                  type: MessageType.INFO,
+                  content: `✅ ${t('messages.mcpSetupSuccess')}
+
+**DuckDuckGo MCP server configured!**
+
+**Next steps:**
+1. Restart Qwen CLI to activate the server
+2. Use \`/mcp\` to verify the server is running
+3. Try web search: "Search for latest TypeScript features"
+
+**Installation:** The server will be auto-installed via npx on first use.`,
+                  timestamp: new Date(),
+                });
+              } catch (error) {
+                addMessage({
+                  type: MessageType.ERROR,
+                  content: t('messages.mcpSetupFailed', { 
+                    error: error instanceof Error ? error.message : String(error) 
+                  }),
+                  timestamp: new Date(),
+                });
+              }
+              return;
+            }
+
+            case 'status': {
+              const message = mcpCheck.hasConfiguration
+                ? `✅ MCP servers are configured. Use \`/mcp\` for details.`
+                : `❌ No MCP servers configured.\n\n${mcpCheck.message || 'Use `/setup-mcp websearch` to get started.'}`;
+
+              addMessage({
+                type: MessageType.INFO,
+                content: message,
+                timestamp: new Date(),
+              });
+              return;
+            }
+
+            default: {
+              addMessage({
+                type: MessageType.ERROR,
+                content: `Unknown setup option: ${subCommand}. Use \`/setup-mcp\` to see available options.`,
+                timestamp: new Date(),
+              });
+              return;
+            }
+          }
         },
       },
       {

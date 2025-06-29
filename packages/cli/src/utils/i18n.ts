@@ -77,6 +77,10 @@ export interface Translations {
       name: string;
       description: string;
     };
+    'setup-mcp': {
+      name: string;
+      description: string;
+    };
     chat: {
       name: string;
       description: string;
@@ -127,6 +131,9 @@ export interface Translations {
     unknownCommand: string;
     errorMessage: string;
     infoMessage: string;
+    mcpSetupSuccess: string;
+    mcpSetupExists: string;
+    mcpSetupFailed: string;
   };
   
   // Help content

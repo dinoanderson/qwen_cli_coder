@@ -17,19 +17,19 @@ Configuration is applied in the following order of precedence (lower numbers are
 Gemini CLI uses `settings.json` files for persistent configuration. There are two locations for these files:
 
 - **User settings file:**
-  - **Location:** `~/.gemini/settings.json` (where `~` is your home directory).
+  - **Location:** `~/.qwen/settings.json` (where `~` is your home directory).
   - **Scope:** Applies to all Gemini CLI sessions for the current user.
 - **Project settings file:**
-  - **Location:** `.gemini/settings.json` within your project's root directory.
+  - **Location:** `.qwen/settings.json` within your project's root directory.
   - **Scope:** Applies only when running Gemini CLI from that specific project. Project settings override user settings.
 
 **Note on environment variables in settings:** String values within your `settings.json` files can reference environment variables using either `$VAR_NAME` or `${VAR_NAME}` syntax. These variables will be automatically resolved when the settings are loaded. For example, if you have an environment variable `MY_API_TOKEN`, you could use it in `settings.json` like this: `"apiKey": "$MY_API_TOKEN"`.
 
-### The `.gemini` directory in your project
+### The `.qwen` directory in your project
 
-In addition to a project settings file, a project's `.gemini` directory can contain other project-specific files related to Gemini CLI's operation, such as:
+In addition to a project settings file, a project's `.qwen` directory can contain other project-specific files related to Qwen CLI's operation, such as:
 
-- [Custom sandbox profiles](#sandboxing) (e.g., `.gemini/sandbox-macos-custom.sb`, `.gemini/sandbox.Dockerfile`).
+- [Custom sandbox profiles](#sandboxing) (e.g., `.qwen/sandbox-macos-custom.sb`, `.qwen/sandbox.Dockerfile`).
 
 ### Available settings in `settings.json`:
 
@@ -217,7 +217,7 @@ In addition to a project settings file, a project's `.gemini` directory can cont
 
 The CLI keeps a history of shell commands you run. To avoid conflicts between different projects, this history is stored in a project-specific directory within your user's home folder.
 
-- **Location:** `~/.gemini/tmp/<project_hash>/shell_history`
+- **Location:** `~/.qwen/tmp/<project_hash>/shell_history`
   - `<project_hash>` is a unique identifier generated from your project's root path.
   - The history is stored in a file named `shell_history`.
 
@@ -267,7 +267,7 @@ The CLI automatically loads environment variables from an `.env` file. The loadi
   - Switches the Seatbelt (`sandbox-exec`) profile on macOS.
   - `permissive-open`: (Default) Restricts writes to the project folder (and a few other folders, see `packages/cli/src/utils/sandbox-macos-permissive-open.sb`) but allows other operations.
   - `strict`: Uses a strict profile that declines operations by default.
-  - `<profile_name>`: Uses a custom profile. To define a custom profile, create a file named `sandbox-macos-<profile_name>.sb` in your project's `.gemini/` directory (e.g., `my-project/.gemini/sandbox-macos-custom.sb`).
+  - `<profile_name>`: Uses a custom profile. To define a custom profile, create a file named `sandbox-macos-<profile_name>.sb` in your project's `.qwen/` directory (e.g., `my-project/.qwen/sandbox-macos-custom.sb`).
 - **`DEBUG` or `DEBUG_MODE`** (often used by underlying libraries or the CLI itself):
   - Set to `true` or `1` to enable verbose debug logging, which can be helpful for troubleshooting.
 - **`NO_COLOR`**:
@@ -372,7 +372,7 @@ This example demonstrates how you can provide general project context, specific 
 
 - **Hierarchical Loading and Precedence:** The CLI implements a sophisticated hierarchical memory system by loading context files (e.g., `GEMINI.md`) from several locations. Content from files lower in this list (more specific) typically overrides or supplements content from files higher up (more general). The exact concatenation order and final context can be inspected using the `/memory show` command. The typical loading order is:
   1.  **Global Context File:**
-      - Location: `~/.gemini/<contextFileName>` (e.g., `~/.gemini/GEMINI.md` in your user home directory).
+      - Location: `~/.qwen/<contextFileName>` (e.g., `~/.qwen/QWEN.md` in your user home directory).
       - Scope: Provides default instructions for all your projects.
   2.  **Project Root & Ancestors Context Files:**
       - Location: The CLI searches for the configured context file in the current working directory and then in each parent directory up to either the project root (identified by a `.git` folder) or your home directory.
@@ -400,7 +400,7 @@ Sandboxing is disabled by default, but you can enable it in a few ways:
 
 By default, it uses a pre-built `gemini-cli-sandbox` Docker image.
 
-For project-specific sandboxing needs, you can create a custom Dockerfile at `.gemini/sandbox.Dockerfile` in your project's root directory. This Dockerfile can be based on the base sandbox image:
+For project-specific sandboxing needs, you can create a custom Dockerfile at `.qwen/sandbox.Dockerfile` in your project's root directory. This Dockerfile can be based on the base sandbox image:
 
 ```dockerfile
 FROM gemini-cli-sandbox
@@ -411,7 +411,7 @@ FROM gemini-cli-sandbox
 # COPY ./my-config /app/my-config
 ```
 
-When `.gemini/sandbox.Dockerfile` exists, you can use `BUILD_SANDBOX` environment variable when running Gemini CLI to automatically build the custom sandbox image:
+When `.qwen/sandbox.Dockerfile` exists, you can use `BUILD_SANDBOX` environment variable when running Qwen CLI to automatically build the custom sandbox image:
 
 ```bash
 BUILD_SANDBOX=1 gemini -s

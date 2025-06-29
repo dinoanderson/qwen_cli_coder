@@ -65,7 +65,7 @@ export function RadioButtonSelect<T>({
     onSelect(item.value);
   };
   const handleHighlight = (item: RadioSelectItem<T>) => {
-    if (onHighlight) {
+    if (onHighlight && item && item.value !== undefined) {
       onHighlight(item.value);
     }
   };

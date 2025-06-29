@@ -31,7 +31,7 @@ This documentation is organized into the following sections:
   - **[Multi-File Read Tool](./tools/multi-file.md):** Documentation for the `read_many_files` tool.
   - **[Shell Tool](./tools/shell.md):** Documentation for the `run_shell_command` tool.
   - **[Web Fetch Tool](./tools/web-fetch.md):** Documentation for the `web_fetch` tool.
-  - **[Web Search Tool](./tools/web-search.md):** Documentation for the `google_web_search` tool.
+  - **[Web Search Tool](./tools/web-search.md):** Documentation for the `web_search` tool.
   - **[Memory Tool](./tools/memory.md):** Documentation for the `save_memory` tool.
 - **AI Providers:**
   - **[Qwen Provider](./providers/qwen.md):** Using Qwen/DashScope models as an alternative to Gemini.

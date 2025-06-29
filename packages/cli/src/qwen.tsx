@@ -37,6 +37,7 @@ import {
 import { validateAuthMethod } from './config/auth.js';
 import { setMaxSizedBoxDebugging } from './ui/components/shared/MaxSizedBox.js';
 import { initializeLanguage, initializeTranslations } from './utils/i18n.js';
+import { initializeQwenDirectories } from './utils/qwenInit.js';
 
 function getNodeMemoryArgs(config: Config): string[] {
   const totalMemoryMB = os.totalmem() / (1024 * 1024);
@@ -116,6 +117,9 @@ export async function main() {
   }
 
   setMaxSizedBoxDebugging(config.getDebugMode());
+
+  // Initialize Qwen directories and configuration
+  await initializeQwenDirectories(workspaceRoot);
 
   // Initialize language settings
   initializeLanguage(settings.merged.language);
