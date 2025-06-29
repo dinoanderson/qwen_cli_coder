@@ -42,3 +42,6 @@ packages/cli/src/generated/
 test-*.js
 test-*.sh
 test*.txt
+
+# Internal memory and documentation files
+CLAUDE.md
