@@ -83,6 +83,7 @@ export const useSlashCommandProcessor = (
   openThemeDialog: () => void,
   openAuthDialog: () => void,
   openLanguageDialog: () => void,
+  openModelDialog: () => void,
   openEditorDialog: () => void,
   performMemoryRefresh: () => Promise<void>,
   toggleCorgiMode: () => void,
@@ -821,57 +822,7 @@ export const useSlashCommandProcessor = (
         name: 'model',
         description: t('commands.model.description'),
         action: (_mainCommand, _subCommand, _args) => {
-          if (!_subCommand) {
-            // List available models
-            const currentModel = config?.getModel() || 'Unknown';
-            let message = `Current model: ${currentModel}\n\nAvailable Qwen models:\n\n`;
-            
-            Object.entries(QWEN_MODELS).forEach(([key, model]: [string, any]) => {
-              const isCurrent = key === currentModel ? ' ← current' : '';
-              message += `• ${key}${isCurrent}\n`;
-              message += `  ${model.displayName}\n`;
-              message += `  Context: ${model.contextWindow.toLocaleString()} tokens | `;
-              message += `Output: ${model.maxOutputTokens.toLocaleString()} tokens\n`;
-              if (model.thinkingWindow) {
-                message += `  Thinking: ${model.thinkingWindow.toLocaleString()} tokens | `;
-              }
-              if (model.isVisionModel) {
-                message += `Vision: ✅ | `;
-              }
-              if (model.pricing) {
-                message += `Pricing: $${model.pricing.input}/M input, $${model.pricing.output}/M output`;
-              }
-              message += `\n  ${model.description}\n\n`;
-            });
-            
-            message += `Usage: /model <model-name> to switch models`;
-            
-            addMessage({
-              type: MessageType.INFO,
-              content: message,
-              timestamp: new Date(),
-            });
-          } else {
-            // Switch to specified model
-            const modelName = _subCommand;
-            if (modelName in QWEN_MODELS) {
-              const previousModel = config?.getModel() || 'Unknown';
-              config?.setModel(modelName);
-              const modelInfo = QWEN_MODELS[modelName as keyof typeof QWEN_MODELS];
-              
-              addMessage({
-                type: MessageType.INFO,
-                content: `Switched from ${previousModel} to ${modelName}\n\n${modelInfo.displayName}\nContext: ${modelInfo.contextWindow.toLocaleString()} tokens | Output: ${modelInfo.maxOutputTokens.toLocaleString()} tokens${modelInfo.isVisionModel ? ' | Vision: ✅' : ''}`,
-                timestamp: new Date(),
-              });
-            } else {
-              addMessage({
-                type: MessageType.ERROR,
-                content: `Unknown model: ${modelName}\n\nAvailable models: ${Object.keys(QWEN_MODELS).join(', ')}\n\nUse /model to see full details.`,
-                timestamp: new Date(),
-              });
-            }
-          }
+          openModelDialog();
         },
       },
       {
@@ -1108,6 +1059,7 @@ export const useSlashCommandProcessor = (
     openThemeDialog,
     openAuthDialog,
     openLanguageDialog,
+    openModelDialog,
     openEditorDialog,
     clearItems,
     performMemoryRefresh,

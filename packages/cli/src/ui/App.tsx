@@ -23,6 +23,7 @@ import { useLoadingIndicator } from './hooks/useLoadingIndicator.js';
 import { useThemeCommand } from './hooks/useThemeCommand.js';
 import { useAuthCommand } from './hooks/useAuthCommand.js';
 import { useLanguageCommand } from './hooks/useLanguageCommand.js';
+import { useModelCommand } from './hooks/useModelCommand.js';
 import { useEditorSettings } from './hooks/useEditorSettings.js';
 import { useSlashCommandProcessor } from './hooks/slashCommandProcessor.js';
 import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
@@ -37,6 +38,7 @@ import { ThemeDialog } from './components/ThemeDialog.js';
 import { AuthDialog } from './components/AuthDialog.js';
 import { AuthInProgress } from './components/AuthInProgress.js';
 import { LanguageDialog } from './components/LanguageDialog.js';
+import { ModelDialog } from './components/ModelDialog.js';
 import { EditorSettingsDialog } from './components/EditorSettingsDialog.js';
 import { Colors } from './colors.js';
 import { Help } from './components/Help.js';
@@ -115,6 +117,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
   const [themeError, setThemeError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [languageError, setLanguageError] = useState<string | null>(null);
+  const [modelError, setModelError] = useState<string | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [footerHeight, setFooterHeight] = useState<number>(0);
   const [corgiMode, setCorgiMode] = useState(false);
@@ -159,6 +162,13 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     handleLanguageSelect,
     handleLanguageHighlight,
   } = useLanguageCommand(settings, setLanguageError, addItem, refreshStatic);
+
+  const {
+    isModelDialogOpen,
+    openModelDialog,
+    handleModelSelect,
+    handleModelHighlight,
+  } = useModelCommand(settings, config, setModelError, addItem);
 
   useEffect(() => {
     if (settings.merged.selectedAuthType) {
@@ -280,6 +290,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     openThemeDialog,
     openAuthDialog,
     openLanguageDialog,
+    openModelDialog,
     openEditorDialog,
     performMemoryRefresh,
     toggleCorgiMode,
@@ -718,6 +729,19 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
                 onSelect={handleLanguageSelect}
                 onHighlight={handleLanguageHighlight}
                 settings={settings}
+              />
+            </Box>
+          ) : isModelDialogOpen ? (
+            <Box flexDirection="column">
+              {modelError && (
+                <Box marginBottom={1}>
+                  <Text color={Colors.AccentRed}>{modelError}</Text>
+                </Box>
+              )}
+              <ModelDialog
+                onSelect={handleModelSelect}
+                onHighlight={handleModelHighlight}
+                currentModel={config?.getModel()}
               />
             </Box>
           ) : isEditorDialogOpen ? (
