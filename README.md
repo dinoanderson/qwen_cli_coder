@@ -1,5 +1,7 @@
 # Qwen CLI - Community Fork
 
+[English](./README.md) | [简体中文](./README_CN.md)
+
 > **A community fork of Google's Gemini CLI, modified to work with Qwen models from Alibaba Cloud**
 
 ![Qwen CLI Screenshot](./docs/assets/qwen_cli.png)
