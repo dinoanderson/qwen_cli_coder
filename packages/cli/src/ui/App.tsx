@@ -22,6 +22,7 @@ import { useQwenStream } from './hooks/useQwenStream.js';
 import { useLoadingIndicator } from './hooks/useLoadingIndicator.js';
 import { useThemeCommand } from './hooks/useThemeCommand.js';
 import { useAuthCommand } from './hooks/useAuthCommand.js';
+import { useLanguageCommand } from './hooks/useLanguageCommand.js';
 import { useEditorSettings } from './hooks/useEditorSettings.js';
 import { useSlashCommandProcessor } from './hooks/slashCommandProcessor.js';
 import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
@@ -35,6 +36,7 @@ import { Footer } from './components/Footer.js';
 import { ThemeDialog } from './components/ThemeDialog.js';
 import { AuthDialog } from './components/AuthDialog.js';
 import { AuthInProgress } from './components/AuthInProgress.js';
+import { LanguageDialog } from './components/LanguageDialog.js';
 import { EditorSettingsDialog } from './components/EditorSettingsDialog.js';
 import { Colors } from './colors.js';
 import { Help } from './components/Help.js';
@@ -112,6 +114,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [themeError, setThemeError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [languageError, setLanguageError] = useState<string | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [footerHeight, setFooterHeight] = useState<number>(0);
   const [corgiMode, setCorgiMode] = useState(false);
@@ -149,6 +152,13 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     isAuthenticating,
     cancelAuthentication,
   } = useAuthCommand(settings, setAuthError, config);
+
+  const {
+    isLanguageDialogOpen,
+    openLanguageDialog,
+    handleLanguageSelect,
+    handleLanguageHighlight,
+  } = useLanguageCommand(settings, setLanguageError, addItem, refreshStatic);
 
   useEffect(() => {
     if (settings.merged.selectedAuthType) {
@@ -269,6 +279,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     setDebugMessage,
     openThemeDialog,
     openAuthDialog,
+    openLanguageDialog,
     openEditorDialog,
     performMemoryRefresh,
     toggleCorgiMode,
@@ -694,6 +705,19 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
                 onHighlight={handleAuthHighlight}
                 settings={settings}
                 initialErrorMessage={authError}
+              />
+            </Box>
+          ) : isLanguageDialogOpen ? (
+            <Box flexDirection="column">
+              {languageError && (
+                <Box marginBottom={1}>
+                  <Text color={Colors.AccentRed}>{languageError}</Text>
+                </Box>
+              )}
+              <LanguageDialog
+                onSelect={handleLanguageSelect}
+                onHighlight={handleLanguageHighlight}
+                settings={settings}
               />
             </Box>
           ) : isEditorDialogOpen ? (

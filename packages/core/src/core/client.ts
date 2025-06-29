@@ -184,7 +184,9 @@ export class QwenClient {
     const history = initialHistory.concat(extraHistory ?? []);
     try {
       const userMemory = this.config.getUserMemory();
-      const systemInstruction = getCoreSystemPrompt(userMemory);
+      // Get language from global variable set by CLI
+      const language = typeof global !== 'undefined' ? (global as any).__qwenCurrentLanguage : undefined;
+      const systemInstruction = getCoreSystemPrompt(userMemory, language);
       const generateContentConfigWithThinking = isThinkingSupported(this.model)
         ? {
             ...this.generateContentConfig,

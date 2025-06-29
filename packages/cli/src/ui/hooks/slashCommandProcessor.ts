@@ -33,7 +33,17 @@ import { createShowMemoryAction } from './useShowMemoryCommand.js';
 import { GIT_COMMIT_INFO } from '../../generated/git-commit.js';
 import { formatDuration, formatMemoryUsage } from '../utils/formatters.js';
 import { getCliVersion } from '../../utils/version.js';
-import { LoadedSettings } from '../../config/settings.js';
+import { LoadedSettings, SettingScope } from '../../config/settings.js';
+import { 
+  setLanguage, 
+  getCurrentLanguage, 
+  isLanguageSupported, 
+  LANGUAGE_NAMES, 
+  SUPPORTED_LANGUAGES,
+  Language,
+  initializeTranslations,
+  t 
+} from '../../utils/i18n.js';
 
 export interface SlashCommandActionReturn {
   shouldScheduleTool?: boolean;
@@ -72,6 +82,7 @@ export const useSlashCommandProcessor = (
   onDebugMessage: (message: string) => void,
   openThemeDialog: () => void,
   openAuthDialog: () => void,
+  openLanguageDialog: () => void,
   openEditorDialog: () => void,
   performMemoryRefresh: () => Promise<void>,
   toggleCorgiMode: () => void,
@@ -194,7 +205,7 @@ export const useSlashCommandProcessor = (
       {
         name: 'help',
         altName: '?',
-        description: 'for help on qwen-cli',
+        description: t('commands.help.description'),
         action: (_mainCommand, _subCommand, _args) => {
           onDebugMessage('Opening help.');
           setShowHelp(true);
@@ -202,7 +213,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'docs',
-        description: 'open full Qwen CLI documentation in your browser',
+        description: t('commands.docs.description') || 'open full Qwen CLI documentation in your browser',
         action: async (_mainCommand, _subCommand, _args) => {
           const docsUrl = 'https://goo.gle/gemini-cli-docs';
           if (process.env.SANDBOX && process.env.SANDBOX !== 'sandbox-exec') {
@@ -223,7 +234,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'clear',
-        description: 'clear the screen and conversation history',
+        description: t('commands.clear.description'),
         action: async (_mainCommand, _subCommand, _args) => {
           onDebugMessage('Clearing terminal and resetting chat.');
           clearItems();
@@ -234,21 +245,28 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'theme',
-        description: 'change the theme',
+        description: t('commands.theme.description'),
         action: (_mainCommand, _subCommand, _args) => {
           openThemeDialog();
         },
       },
       {
         name: 'auth',
-        description: 'change the auth method',
+        description: t('commands.auth.description'),
         action: (_mainCommand, _subCommand, _args) => {
           openAuthDialog();
         },
       },
       {
+        name: 'lang',
+        description: t('commands.lang.description'),
+        action: (_mainCommand, _subCommand, _args) => {
+          openLanguageDialog();
+        },
+      },
+      {
         name: 'editor',
-        description: 'set external editor preference',
+        description: t('commands.editor.description') || 'set external editor preference',
         action: (_mainCommand, _subCommand, _args) => {
           openEditorDialog();
         },
@@ -256,7 +274,7 @@ export const useSlashCommandProcessor = (
       {
         name: 'stats',
         altName: 'usage',
-        description: 'check session stats',
+        description: t('commands.stats.description'),
         action: (_mainCommand, _subCommand, _args) => {
           const now = new Date();
           const { sessionStartTime, cumulative, currentTurn } = session.stats;
@@ -273,7 +291,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'mcp',
-        description: 'list configured MCP servers and tools',
+        description: t('commands.mcp.description'),
         action: async (_mainCommand, _subCommand, _args) => {
           // Check if the _subCommand includes a specific flag to control description visibility
           let useShowDescriptions = showToolDescriptions;
@@ -472,8 +490,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'memory',
-        description:
-          'manage memory. Usage: /memory <show|refresh|add> [text for add]',
+        description: t('commands.memory.description'),
         action: (mainCommand, subCommand, args) => {
           switch (subCommand) {
             case 'show':
@@ -496,7 +513,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'tools',
-        description: 'list available Qwen CLI tools',
+        description: t('commands.tools.description'),
         action: async (_mainCommand, _subCommand, _args) => {
           // Check if the _subCommand includes a specific flag to control description visibility
           let useShowDescriptions = showToolDescriptions;
@@ -576,7 +593,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'about',
-        description: 'show version info',
+        description: t('commands.about.description'),
         action: async (_mainCommand, _subCommand, _args) => {
           const osVersion = process.platform;
           let sandboxEnv = 'no sandbox';
@@ -601,7 +618,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'bug',
-        description: 'submit a bug report',
+        description: t('commands.bug.description') || 'submit a bug report',
         action: async (_mainCommand, _subCommand, args) => {
           let bugDescription = _subCommand || '';
           if (args) {
@@ -663,8 +680,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'chat',
-        description:
-          'Manage conversation history. Usage: /chat <list|save|resume> [tag]',
+        description: t('commands.chat.description'),
         action: async (_mainCommand, subCommand, args) => {
           const tag = (args || '').trim();
           const logger = new Logger(config?.getSessionId() || '');
@@ -776,7 +792,7 @@ export const useSlashCommandProcessor = (
       {
         name: 'quit',
         altName: 'exit',
-        description: 'exit the cli',
+        description: t('commands.quit.description'),
         action: async (mainCommand, _subCommand, _args) => {
           const now = new Date();
           const { sessionStartTime, cumulative } = session.stats;
@@ -803,7 +819,7 @@ export const useSlashCommandProcessor = (
       },
       {
         name: 'model',
-        description: 'switch between Qwen models or list available models',
+        description: t('commands.model.description'),
         action: (_mainCommand, _subCommand, _args) => {
           if (!_subCommand) {
             // List available models
@@ -859,9 +875,60 @@ export const useSlashCommandProcessor = (
         },
       },
       {
+        name: 'debug-prompt',
+        description: 'show current language and prompt debugging info',
+        action: async (_mainCommand, _subCommand, _args) => {
+          // Initialize translations to ensure they're loaded
+          await initializeTranslations();
+          
+          const currentLang = getCurrentLanguage();
+          const currentLangName = LANGUAGE_NAMES[currentLang];
+          const globalLang = typeof global !== 'undefined' ? (global as any).__qwenCurrentLanguage : 'not set';
+          
+          // Check if translations are working
+          const testTranslation = t('commands.help.description');
+          const isTranslationWorking = testTranslation !== 'commands.help.description';
+          
+          // Get system locale
+          const systemLocale = process.env.LANG || process.env.LC_ALL || 'not set';
+          
+          const debugInfo = `
+🔍 Language Debug Information:
+
+**Current Language State:**
+- Frontend Language: ${currentLangName} (${currentLang})
+- Global Variable: ${globalLang}
+- System Locale: ${systemLocale}
+
+**Translation System:**
+- Translation Loading: ${isTranslationWorking ? '✅ Working' : '❌ Failed'}
+- Test Translation: "${testTranslation}"
+- Available Languages: ${SUPPORTED_LANGUAGES.join(', ')}
+
+**Settings:**
+- Settings Language: ${settings.merged.language || 'not set'}
+- Settings Scope: User/Workspace merged
+
+**Environment:**
+- LANG: ${process.env.LANG || 'not set'}
+- LC_ALL: ${process.env.LC_ALL || 'not set'}
+
+**System Prompt Info:**
+- System prompt will use language: ${globalLang || currentLang}
+- Next chat session will use: ${globalLang === 'zh' ? 'Chinese' : 'English'} system prompt
+          `.trim();
+
+          addMessage({
+            type: MessageType.INFO,
+            content: debugInfo,
+            timestamp: new Date(),
+          });
+        },
+      },
+      {
         name: 'compress',
         altName: 'summarize',
-        description: 'Compresses the context by replacing it with a summary.',
+        description: t('commands.compress.description'),
         action: async (_mainCommand, _subCommand, _args) => {
           if (pendingCompressionItemRef.current !== null) {
             addMessage({
@@ -1040,6 +1107,7 @@ export const useSlashCommandProcessor = (
     refreshStatic,
     openThemeDialog,
     openAuthDialog,
+    openLanguageDialog,
     openEditorDialog,
     clearItems,
     performMemoryRefresh,
@@ -1057,6 +1125,7 @@ export const useSlashCommandProcessor = (
     setQuittingMessages,
     pendingCompressionItemRef,
     setPendingCompressionItem,
+    getCurrentLanguage(), // Re-render commands when language changes
   ]);
 
   const handleSlashCommand = useCallback(
