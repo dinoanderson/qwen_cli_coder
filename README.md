@@ -23,6 +23,8 @@ With the Qwen CLI you can:
 - Automate operational tasks, like querying pull requests or handling complex rebases
 - Use tools and MCP servers to connect new capabilities
 - Advanced vision capabilities with Qwen VL models for image analysis and processing
+- **Switch between multiple Qwen models** with an intuitive dialog interface
+- **Use the CLI in Chinese or English** with full localization support
 
 ## Quickstart
 
@@ -70,6 +72,27 @@ This fork supports the following Qwen models:
 - **qwen-vl-plus-latest** - Vision model for image analysis (32k context)
 
 For detailed model specifications, see our [model documentation](./docs/providers/qwen.md).
+
+## Key Features
+
+### 🌐 Multilingual Support
+Switch between English and Chinese with the `/lang` command:
+- Full UI translation (menus, help text, command descriptions)
+- System prompts automatically adapt to selected language
+- Settings are persisted across sessions
+
+### 🤖 Dynamic Model Switching
+Easily switch between Qwen models with the `/model` command:
+- Interactive dialog showing all available models
+- Model specifications (context window, output tokens, vision support)
+- Seamless switching without restarting the CLI
+
+### ⌨️ Consistent User Experience
+All configuration commands now use a unified dialog pattern:
+- `/theme` - Change visual themes
+- `/auth` - Switch authentication methods  
+- `/lang` - Change interface language
+- `/model` - Switch Qwen models
 
 ## Examples
 
