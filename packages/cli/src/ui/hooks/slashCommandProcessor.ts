@@ -90,6 +90,10 @@ export const useSlashCommandProcessor = (
   toggleCorgiMode: () => void,
   showToolDescriptions: boolean = false,
   setQuittingMessages: (message: HistoryItem[]) => void,
+  openMcpMenuDialog: () => void,
+  openMcpBrowseDialog: () => void,
+  openMcpSearchDialog: () => void,
+  openMcpInstallDialog: () => void,
 ) => {
   const session = useSessionStats();
   const gitService = useMemo(() => {
@@ -295,6 +299,28 @@ export const useSlashCommandProcessor = (
         name: 'mcp',
         description: t('commands.mcp.description'),
         action: async (_mainCommand, _subCommand, _args) => {
+          // Handle MCP sub-commands
+          if (_subCommand === 'browse' || _subCommand === 'b') {
+            openMcpBrowseDialog();
+            return;
+          }
+          
+          if (_subCommand === 'search' || _subCommand === 's') {
+            openMcpSearchDialog();
+            return;
+          }
+          
+          if (_subCommand === 'install' || _subCommand === 'i') {
+            openMcpInstallDialog();
+            return;
+          }
+          
+          // If no sub-command or 'menu' sub-command, show interactive menu
+          if (!_subCommand || _subCommand === 'menu' || _subCommand === 'm') {
+            openMcpMenuDialog();
+            return;
+          }
+          
           // Check if the _subCommand includes a specific flag to control description visibility
           let useShowDescriptions = showToolDescriptions;
           if (_subCommand === 'desc' || _subCommand === 'descriptions') {

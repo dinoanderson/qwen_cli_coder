@@ -59,6 +59,11 @@ export * from './tools/sub-agent.js';
 export * from './tools/parallel-executor.js';
 export * from './tools/delegate-task.js';
 export * from './tools/aggregate-results.js';
+export * from './tools/add-mcp-server.js';
+export * from './tools/search-mcp-servers.js';
+
+// Export services
+export * from './services/mcpRegistry.js';
 
 // Export telemetry functions
 export * from './telemetry/index.js';

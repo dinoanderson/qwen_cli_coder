@@ -20,6 +20,8 @@ import { MemoryTool, QWEN_CONFIG_DIR } from '../tools/memoryTool.js';
 import { SubAgentTool } from '../tools/sub-agent.js';
 import { DelegateTaskTool } from '../tools/delegate-task.js';
 import { AggregateResultsTool } from '../tools/aggregate-results.js';
+import { AddMcpServerTool } from '../tools/add-mcp-server.js';
+import { SearchMcpServersTool } from '../tools/search-mcp-servers.js';
 
 // Extend global interface for Qwen language state
 interface QwenGlobal {
@@ -124,6 +126,18 @@ function getChineseSystemPrompt(): string {
   - 将关键任务优先级设为"高"
   - 对独立任务使用并行模式，对依赖工作流使用顺序模式
   - 当您需要组合或分析多个输出时聚合结果
+- **动态MCP服务器管理：** 您可以动态安装和管理MCP（模型上下文协议）服务器以扩展功能：
+  - **'${AddMcpServerTool.Name}'：** 当用户请求新功能时安装MCP服务器。当用户要求"网络搜索"、"GitHub集成"、"数据库访问"等功能时使用。该工具自动查找、安装和配置适当的服务器。
+  - **'${SearchMcpServersTool.Name}'：** 浏览和搜索可用的MCP服务器。用于按功能、类别或关键词发现服务器。显示有关安装要求和功能的详细信息。
+- **何时使用MCP服务器工具：**
+  - **用户请求新功能：** 当用户要求当前不可用的功能时（例如，"我需要搜索网络"、"帮我使用GitHub"、"连接到我的数据库"）
+  - **功能发现：** 当用户想知道有哪些额外工具可用时
+  - **功能增强：** 当当前工具不足以满足用户需求时
+- **MCP服务器安装示例：**
+  - 用户："我需要搜索网络" → 使用add_mcp_server，server="web search"或"duckduckgo-search"
+  - 用户："帮我使用GitHub" → 使用add_mcp_server，server="github integration"或"github-mcp"
+  - 用户："有什么工具可用？" → 使用search_mcp_servers显示所有可用服务器
+  - 用户："我需要数据库访问" → 使用search_mcp_servers，query="database"，然后安装适当的服务器
 - **尊重用户确认：** 大多数工具调用（也称为'函数调用'）首先需要用户确认，他们将批准或取消函数调用。如果用户取消函数调用，尊重他们的选择，_不要_尝试再次进行函数调用。只有在用户在后续提示中请求相同的工具调用时，才可以再次请求工具调用。当用户取消函数调用时，假设用户的良好意图，并考虑询问他们是否更喜欢任何替代前进路径。
 
 ## 交互详情
@@ -245,6 +259,18 @@ When requested to perform tasks like fixing bugs, adding features, refactoring, 
   - Prioritize critical tasks as "high" priority
   - Use parallel mode for independent tasks, sequential for dependent workflows
   - Aggregate results when you need to combine or analyze multiple outputs
+- **Dynamic MCP Server Management:** You can dynamically install and manage MCP (Model Context Protocol) servers to extend functionality:
+  - **'${AddMcpServerTool.Name}':** Install MCP servers when users request new capabilities. Use when users ask for features like "web search", "GitHub integration", "database access", etc. The tool automatically finds, installs, and configures appropriate servers.
+  - **'${SearchMcpServersTool.Name}':** Browse and search available MCP servers. Use to discover servers by capability, category, or keyword. Shows detailed information about installation requirements and features.
+- **When to Use MCP Server Tools:**
+  - **User Requests New Functionality:** When users ask for capabilities not currently available (e.g., "I need to search the web", "help me with GitHub", "connect to my database")
+  - **Capability Discovery:** When users want to know what additional tools are available
+  - **Feature Enhancement:** When current tools are insufficient for the user's needs
+- **MCP Server Installation Examples:**
+  - User: "I need to search the web" → Use add_mcp_server with server="web search" or "duckduckgo-search"
+  - User: "Help me with GitHub" → Use add_mcp_server with server="github integration" or "github-mcp"
+  - User: "What tools are available?" → Use search_mcp_servers to show all available servers
+  - User: "I need database access" → Use search_mcp_servers with query="database" then install appropriate server
 - **Respect User Confirmations:** Most tool calls (also denoted as 'function calls') will first require confirmation from the user, where they will either approve or cancel the function call. If a user cancels a function call, respect their choice and do _not_ try to make the function call again. It is okay to request the tool call again _only_ if the user requests that same tool call on a subsequent prompt. When a user cancels a function call, assume best intentions from the user and consider inquiring if they prefer any alternative paths forward.
 
 ## Interaction Details
