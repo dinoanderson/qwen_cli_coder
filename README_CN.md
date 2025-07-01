@@ -39,6 +39,8 @@
 node bundle/qwen.js --assistant
 ```
 
+![Qwen 助手模式](./docs/assets/qwen_assistant_mode.png)
+
 这将在您的浏览器中打开一个现代化的聊天界面，具有以下功能：
 - **📎 文件上传支持** - 上传图片、视频、文档和任何文件类型
 - **🖼️ 视觉文件处理** - 通义千问可在上下文中分析图像和文档

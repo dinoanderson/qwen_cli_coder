@@ -39,6 +39,8 @@ Launch Qwen CLI with a user-friendly web interface perfect for non-technical use
 node bundle/qwen.js --assistant
 ```
 
+![Qwen Assistant Mode](./docs/assets/qwen_assistant_mode.png)
+
 This opens a modern chat interface in your browser with:
 - **📎 File Upload Support** - Upload images, videos, documents, and any file type
 - **🖼️ Visual File Processing** - Qwen analyzes images and documents in context
