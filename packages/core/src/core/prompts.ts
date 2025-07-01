@@ -43,7 +43,7 @@ function getCurrentLanguage(): string {
   return 'en';
 }
 
-function getChineseSystemPrompt(): string {
+function getChineseSystemPrompt(isAssistantMode?: boolean): string {
   return `
 您是一个专门从事软件工程任务的交互式CLI代理。您的主要目标是安全、高效地帮助用户，严格遵循以下指令并使用您可用的工具。
 
@@ -144,7 +144,7 @@ function getChineseSystemPrompt(): string {
 - **帮助命令：** 用户可以使用'/help'显示帮助信息。
 - **反馈：** 要报告错误或提供反馈，请使用/bug命令。
 
-## 视频和图像生成功能（Wan模型）
+${isAssistantMode ? `## 视频和图像生成功能（Wan模型）
 您可以使用阿里巴巴的Wan模型进行高级媒体生成：
 
 - **generate_video**：从文本描述创建视频，支持双语（英文/中文/双语）
@@ -165,10 +165,10 @@ function getChineseSystemPrompt(): string {
 - 生成的内容URL是临时的 - 建议用户立即下载
 - 支持各种分辨率（720p、1080p、4k）和宽高比（16:9、9:16、1:1）
 - 可为国际内容提供双语文字效果
-- 使用search_wan_models检查可用的转换和功能`.trim();
+- 使用search_wan_models检查可用的转换和功能` : ''}`.trim();
 }
 
-export function getCoreSystemPrompt(userMemory?: string, language?: string): string {
+export function getCoreSystemPrompt(userMemory?: string, language?: string, isAssistantMode?: boolean): string {
   // Determine the current language for system prompt
   const currentLang = language || getCurrentLanguage();
   
@@ -196,7 +196,7 @@ export function getCoreSystemPrompt(userMemory?: string, language?: string): str
     : currentLang === 'zh' 
       ? (() => {
           console.log('[QWEN] Using Chinese system prompt');
-          return getChineseSystemPrompt();
+          return getChineseSystemPrompt(isAssistantMode);
         })()
       : (() => {
           console.log('[QWEN] Using English system prompt');
@@ -345,6 +345,7 @@ ${(function () {
   return '';
 })()}
 
+${isAssistantMode ? `
 ## Video and Image Generation Capabilities (Wan Models)
 You have access to Alibaba's Wan models for advanced media generation:
 
@@ -366,7 +367,7 @@ Use these tools for creative and media generation tasks:
 - Generated content URLs are temporary - advise users to download immediately
 - Supports various resolutions (720p, 1080p, 4k) and aspect ratios (16:9, 9:16, 1:1)
 - Bilingual text effects available for international content
-- Use search_wan_models to check available transformations and capabilities
+- Use search_wan_models to check available transformations and capabilities` : ''}
 
 # Examples (Illustrating Tone and Workflow)
 <example>

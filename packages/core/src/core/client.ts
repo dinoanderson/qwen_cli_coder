@@ -186,7 +186,8 @@ export class QwenClient {
       const userMemory = this.config.getUserMemory();
       // Get language from global variable set by CLI
       const language = typeof global !== 'undefined' ? (global as any).__qwenCurrentLanguage : undefined;
-      const systemInstruction = getCoreSystemPrompt(userMemory, language);
+      const isAssistantMode = this.config.isAssistantMode();
+      const systemInstruction = getCoreSystemPrompt(userMemory, language, isAssistantMode);
       const generateContentConfigWithThinking = isThinkingSupported(this.model)
         ? {
             ...this.generateContentConfig,
@@ -263,7 +264,9 @@ export class QwenClient {
   ): Promise<Record<string, unknown>> {
     try {
       const userMemory = this.config.getUserMemory();
-      const systemInstruction = getCoreSystemPrompt(userMemory);
+      const language = typeof global !== 'undefined' ? (global as any).__qwenCurrentLanguage : undefined;
+      const isAssistantMode = this.config.isAssistantMode();
+      const systemInstruction = getCoreSystemPrompt(userMemory, language, isAssistantMode);
       const requestConfig = {
         abortSignal,
         ...this.generateContentConfig,
@@ -355,7 +358,9 @@ export class QwenClient {
 
     try {
       const userMemory = this.config.getUserMemory();
-      const systemInstruction = getCoreSystemPrompt(userMemory);
+      const language = typeof global !== 'undefined' ? (global as any).__qwenCurrentLanguage : undefined;
+      const isAssistantMode = this.config.isAssistantMode();
+      const systemInstruction = getCoreSystemPrompt(userMemory, language, isAssistantMode);
 
       const requestConfig = {
         abortSignal,
