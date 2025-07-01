@@ -27,6 +27,7 @@ With the Qwen CLI you can:
 - Advanced vision capabilities with Qwen VL models for image analysis and processing
 - **Switch between multiple Qwen models** with an intuitive dialog interface
 - **Use the CLI in Chinese or English** with full localization support
+- **Multi-agent task coordination** for parallel processing and complex workflows
 
 ## Quickstart
 
@@ -129,6 +130,35 @@ If you prefer manual configuration, add to your `.qwen/settings.json`:
 - `/setup-mcp` - Show available MCP setup options
 - `/tools` - List all available tools including web search
 
+### 🚀 Multi-Agent Task Coordination
+Revolutionary parallel processing capabilities that enable sophisticated workflow automation:
+
+**Core Multi-Agent Tools:**
+- **`spawn_sub_agent`** - Launch independent Qwen CLI instances for isolated tasks
+- **`delegate_task`** - Split complex work into coordinated subtasks with parallel/sequential execution
+- **`aggregate_results`** - Combine and analyze outputs from multiple agents
+
+**Key Capabilities:**
+- **Parallel Processing:** Execute up to 5 concurrent agents simultaneously
+- **Intelligent Scheduling:** Priority-based task queue with timeout management
+- **Resource Management:** Automatic load balancing and memory optimization
+- **Result Synthesis:** Multiple aggregation formats (summary, merge, compare, analyze)
+
+**Example Multi-Agent Workflows:**
+```text
+> Analyze this entire codebase using multiple agents: one for security issues, one for performance bottlenecks, and one for code quality metrics
+```
+
+```text
+> Set up a new project with parallel tasks: create frontend structure, set up backend APIs, configure database, and write documentation
+```
+
+```text
+> Run comprehensive testing: unit tests, integration tests, and performance benchmarks all in parallel, then aggregate the results
+```
+
+For detailed usage examples, see the [Multi-Agent System Documentation](./docs/multi-agent-system.md).
+
 ## Examples
 
 Once the CLI is running, you can start interacting with Qwen from your shell.
@@ -198,6 +228,22 @@ Use MCP servers to integrate your local system tools with your enterprise collab
 
 ```text
 > Make a full-screen web app for a wall display to show our most interacted-with GitHub issues.
+```
+
+### Multi-agent coordination
+
+Leverage the power of parallel processing for complex tasks.
+
+```text
+> Use multiple agents to simultaneously refactor the authentication system, update the API documentation, and create comprehensive tests
+```
+
+```text
+> Analyze this monorepo with dedicated agents for each microservice, then aggregate findings into a single architecture report
+```
+
+```text
+> Set up a complete CI/CD pipeline: one agent configures Docker, another sets up GitHub Actions, and a third creates deployment scripts
 ```
 
 ### Interact with your system
