@@ -29,6 +29,7 @@ With the Qwen CLI you can:
 - **Use the CLI in Chinese or English** with full localization support
 - **Multi-agent task coordination** for parallel processing and complex workflows
 - **Assistant Mode** with a modern web interface for non-technical users
+- **Media Generation with Wan Models** - Create videos from text/images and transform images (Assistant Mode only)
 
 ## 🌐 Assistant Mode (New!)
 

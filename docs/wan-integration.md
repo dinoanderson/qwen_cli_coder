@@ -2,6 +2,10 @@
 
 This document describes how to use the Wan media generation tools in Qwen CLI's Assistant Mode.
 
+## Testing Status
+
+The Wan tools have been successfully integrated and are ready for testing with a valid DashScope API key. Integration tests have been created following the project's TestRig framework.
+
 ## Overview
 
 Wan is Alibaba's advanced media generation model family that supports:
