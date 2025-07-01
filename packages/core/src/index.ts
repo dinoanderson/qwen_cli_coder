@@ -55,6 +55,10 @@ export * from './tools/web-search.js';
 export * from './tools/read-many-files.js';
 export * from './tools/mcp-client.js';
 export * from './tools/mcp-tool.js';
+export * from './tools/sub-agent.js';
+export * from './tools/parallel-executor.js';
+export * from './tools/delegate-task.js';
+export * from './tools/aggregate-results.js';
 
 // Export telemetry functions
 export * from './telemetry/index.js';

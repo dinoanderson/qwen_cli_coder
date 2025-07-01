@@ -24,6 +24,9 @@ import { WebFetchTool } from '../tools/web-fetch.js';
 import { ReadManyFilesTool } from '../tools/read-many-files.js';
 import { MemoryTool, setQwenMdFilename } from '../tools/memoryTool.js';
 import { WebSearchTool } from '../tools/web-search.js';
+import { SubAgentTool } from '../tools/sub-agent.js';
+import { DelegateTaskTool } from '../tools/delegate-task.js';
+import { AggregateResultsTool } from '../tools/aggregate-results.js';
 import { QwenClient } from '../core/client.js';
 import { QWEN_CONFIG_DIR as QWEN_DIR } from '../tools/memoryTool.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
@@ -494,6 +497,9 @@ export function createToolRegistry(config: Config): Promise<ToolRegistry> {
   registerCoreTool(ShellTool, config);
   registerCoreTool(MemoryTool);
   registerCoreTool(WebSearchTool, config);
+  registerCoreTool(SubAgentTool, config);
+  registerCoreTool(DelegateTaskTool, config);
+  registerCoreTool(AggregateResultsTool, config);
   return (async () => {
     await registry.discoverTools();
     return registry;
