@@ -1,0 +1,249 @@
+/* MessageBubble.css - Individual message styling */
+
+.message-bubble {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  margin-bottom: 16px;
+}
+
+.message-bubble.user {
+  align-self: flex-end;
+}
+
+.message-bubble.assistant,
+.message-bubble.system,
+.message-bubble.tool {
+  align-self: flex-start;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+
+.message-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.message-icon {
+  font-size: 16px;
+}
+
+.message-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.message-content {
+  border-radius: 16px;
+  padding: 12px 16px;
+  position: relative;
+}
+
+/* User messages */
+.user .message-content {
+  background: #007aff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* Assistant messages */
+.assistant .message-content {
+  background: #f0f0f0;
+  color: #333;
+  border-bottom-left-radius: 4px;
+}
+
+/* System messages */
+.system .message-content {
+  background: #e8f4fd;
+  color: #1a365d;
+  border-left: 3px solid #3182ce;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Tool messages */
+.tool .message-content {
+  background: #f7fafc;
+  color: #2d3748;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.5;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin: 0.5em 0;
+}
+
+.markdown-content h1 {
+  font-size: 1.25em;
+}
+
+.markdown-content h2 {
+  font-size: 1.15em;
+}
+
+.markdown-content h3 {
+  font-size: 1.1em;
+}
+
+.markdown-content p {
+  margin: 0.5em 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-content li {
+  margin: 0.25em 0;
+}
+
+.markdown-content .code-block {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.markdown-content .inline-code {
+  background: rgba(175, 184, 193, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* Streaming cursor */
+.streaming-cursor {
+  animation: blink 1s infinite;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Tool details */
+.tool-details {
+  margin-top: 8px;
+}
+
+.tool-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.tool-details pre {
+  background: #f7fafc;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+/* Usage info */
+.usage-info {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #666;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  .message-label {
+    color: #ccc;
+  }
+
+  .message-time {
+    color: #999;
+  }
+
+  .assistant .message-content {
+    background: #2d2d2d;
+    color: #e5e5e5;
+  }
+
+  .system .message-content {
+    background: #1a2332;
+    color: #90cdf4;
+    border-left-color: #4299e1;
+  }
+
+  .tool .message-content {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+  }
+
+  .markdown-content .code-block {
+    background: #1e1e1e;
+    border-color: #404040;
+    color: #e5e5e5;
+  }
+
+  .markdown-content .inline-code {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .tool-details summary {
+    color: #a0aec0;
+  }
+
+  .tool-details pre {
+    background: #1e1e1e;
+    color: #e5e5e5;
+  }
+
+  .usage-info {
+    color: #a0aec0;
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 95%;
+  }
+
+  .message-content {
+    padding: 10px 12px;
+  }
+
+  .markdown-content .code-block {
+    font-size: 12px;
+    padding: 8px;
+  }
+}

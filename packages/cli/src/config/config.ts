@@ -54,6 +54,7 @@ interface CliArgs {
   telemetryTarget: string | undefined;
   telemetryOtlpEndpoint: string | undefined;
   telemetryLogPrompts: boolean | undefined;
+  assistant: boolean | undefined;
 }
 
 async function parseArguments(): Promise<CliArgs> {
@@ -136,6 +137,11 @@ async function parseArguments(): Promise<CliArgs> {
       alias: 'c',
       type: 'boolean',
       description: 'Enables checkpointing of file edits',
+      default: false,
+    })
+    .option('assistant', {
+      type: 'boolean',
+      description: 'Launch in assistant mode with web interface instead of terminal',
       default: false,
     })
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
@@ -255,6 +261,7 @@ export async function loadCliConfig(
     bugCommand: settings.bugCommand,
     model: argv.model!,
     extensionContextFilePaths,
+    assistantMode: argv.assistant || false,
   });
 }
 

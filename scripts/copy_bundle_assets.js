@@ -47,4 +47,25 @@ for (const file of sbFiles) {
   copyFileSync(join(root, file), join(bundleDir, basename(file)));
 }
 
+// Copy web assets for assistant mode
+const webAssetsDir = join(root, 'packages/cli/dist/src/web');
+if (existsSync(webAssetsDir)) {
+  // Copy index.html
+  const indexHtmlPath = join(webAssetsDir, 'index.html');
+  if (existsSync(indexHtmlPath)) {
+    copyFileSync(indexHtmlPath, join(bundleDir, 'index.html'));
+    console.log('Copied index.html to bundle/');
+  }
+  
+  // Copy CSS files
+  const cssDir = join(webAssetsDir, 'styles');
+  if (existsSync(cssDir)) {
+    const cssFiles = glob.sync('*.css', { cwd: cssDir });
+    for (const cssFile of cssFiles) {
+      copyFileSync(join(cssDir, cssFile), join(bundleDir, cssFile));
+    }
+    console.log(`Copied ${cssFiles.length} CSS files to bundle/`);
+  }
+}
+
 console.log('Assets copied to bundle/');

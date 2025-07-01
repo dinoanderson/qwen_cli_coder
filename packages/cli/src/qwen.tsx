@@ -38,6 +38,8 @@ import { validateAuthMethod } from './config/auth.js';
 import { setMaxSizedBoxDebugging } from './ui/components/shared/MaxSizedBox.js';
 import { initializeLanguage, initializeTranslations } from './utils/i18n.js';
 import { initializeQwenDirectories } from './utils/qwenInit.js';
+import { WebServer } from './web/webServer.js';
+import open from 'open';
 
 function getNodeMemoryArgs(config: Config): string[] {
   const totalMemoryMB = os.totalmem() / (1024 * 1024);
@@ -81,6 +83,54 @@ async function relaunchWithAdditionalArgs(additionalArgs: string[]) {
 
   await new Promise((resolve) => child.on('close', resolve));
   process.exit(0);
+}
+
+async function launchAssistantMode(
+  config: Config,
+  settings: LoadedSettings,
+  startupWarnings: string[] = []
+): Promise<void> {
+  console.log('🤖 Starting Qwen Assistant in web mode...');
+  
+  const serverConfig = {
+    port: parseInt(process.env.QWEN_ASSISTANT_PORT || '3000'),
+    host: process.env.QWEN_ASSISTANT_HOST || 'localhost',
+  };
+  
+  try {
+    const webServer = new WebServer(config, settings, serverConfig);
+    await webServer.start(serverConfig);
+    
+    const url = webServer.getUrl(serverConfig);
+    console.log(`🌐 Opening browser at ${url}`);
+    
+    // Open browser automatically
+    try {
+      await open(url);
+    } catch (error) {
+      console.log(`Could not open browser automatically. Please visit: ${url}`);
+    }
+    
+    // Keep the process alive
+    console.log('Press Ctrl+C to stop the assistant');
+    
+    // Handle graceful shutdown
+    process.on('SIGINT', async () => {
+      console.log('\n📴 Shutting down Qwen Assistant...');
+      await webServer.stop();
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', async () => {
+      console.log('\n📴 Shutting down Qwen Assistant...');
+      await webServer.stop();
+      process.exit(0);
+    });
+    
+  } catch (error) {
+    console.error('❌ Failed to start Qwen Assistant:', error);
+    process.exit(1);
+  }
 }
 
 export async function main() {
@@ -173,6 +223,18 @@ export async function main() {
   }
   let input = config.getQuestion();
   const startupWarnings = await getStartupWarnings();
+
+  // Check for assistant mode first
+  if (config.getAssistantMode()) {
+    // Initialize authentication for assistant mode
+    if (settings.merged.selectedAuthType) {
+      await config.refreshAuth(settings.merged.selectedAuthType);
+    }
+    
+    // Launch web interface instead of terminal
+    await launchAssistantMode(config, settings, startupWarnings);
+    return;
+  }
 
   // Render UI, passing necessary config values. Check that there is no command line question.
   if (process.stdin.isTTY && input?.length === 0) {

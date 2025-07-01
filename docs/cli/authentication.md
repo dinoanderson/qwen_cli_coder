@@ -1,16 +1,16 @@
 ## Authentication Setup
 
-The Gemini CLI requires you to authenticate with an AI service provider. On initial startup you'll need to configure **one** of the following authentication methods:
+The Qwen CLI requires you to authenticate with an AI service provider. On initial startup you'll need to configure **one** of the following authentication methods:
 
-1.  **Login with Google (Gemini Code Assist):**
+1.  **Login with Google (Qwen Code Assist):**
 
     - Use this option to log in with your google account.
-    - During initial startup, Gemini CLI will direct you to a webpage for authentication. Once authenticated, your credentials will be cached locally so the web login can be skipped on subsequent runs.
-    - Note that the web login must be done in a browser that can communicate with the machine Gemini CLI is being run from. (Specifically, the browser will be redirected to a localhost url that Gemini CLI will be listening on).
+    - During initial startup, Qwen CLI will direct you to a webpage for authentication. Once authenticated, your credentials will be cached locally so the web login can be skipped on subsequent runs.
+    - Note that the web login must be done in a browser that can communicate with the machine Qwen CLI is being run from. (Specifically, the browser will be redirected to a localhost url that Qwen CLI will be listening on).
     - Users may have to specify a GOOGLE_CLOUD_PROJECT if:
       1. You have a Google Workspace account. Google Workspace is a paid service for businesses and organizations that provides a suite of productivity tools, including a custom email domain (e.g. your-name@your-company.com), enhanced security features, and administrative controls. These accounts are often managed by an employer or school.
       2. You are a licensed Code Assist user. This can happen if you have previously purchased a Code Assist license or have acquired one through Google Developer Program.
-      - If you fall into one of these categories, you must first configure a Google Cloud Project Id to use, [enable the Gemini for Cloud API](https://cloud.google.com/gemini/docs/discover/set-up-gemini#enable-api) and [configure access permissions](https://cloud.google.com/gemini/docs/discover/set-up-gemini#grant-iam). You can temporarily set the environment variable in your current shell session using the following command:
+      - If you fall into one of these categories, you must first configure a Google Cloud Project Id to use, [enable the Qwen for Cloud API](https://cloud.google.com/Qwen/docs/discover/set-up-Qwen#enable-api) and [configure access permissions](https://cloud.google.com/Qwen/docs/discover/set-up-Qwen#grant-iam). You can temporarily set the environment variable in your current shell session using the following command:
         ```bash
         export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
         ```
@@ -20,30 +20,30 @@ The Gemini CLI requires you to authenticate with an AI service provider. On init
         source ~/.bashrc
         ```
 
-2.  **<a id="gemini-api-key"></a>Gemini API key:**
+2.  **<a id="Qwen-api-key"></a>Qwen API key:**
 
     - Obtain your API key from Google AI Studio: [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
-    - Set the `GEMINI_API_KEY` environment variable. In the following methods, replace `YOUR_GEMINI_API_KEY` with the API key you obtained from Google AI Studio:
+    - Set the `Qwen_API_KEY` environment variable. In the following methods, replace `YOUR_Qwen_API_KEY` with the API key you obtained from Google AI Studio:
       - You can temporarily set the environment variable in your current shell session using the following command:
         ```bash
-        export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+        export Qwen_API_KEY="YOUR_Qwen_API_KEY"
         ```
       - For repeated use, you can add the environment variable to your `.env` file (located in the project directory or user home directory) or your shell's configuration file (like `~/.bashrc`, `~/.zshrc`, or `~/.profile`). For example, the following command adds the environment variable to a `~/.bashrc` file:
         ```bash
-        echo 'export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"' >> ~/.bashrc
+        echo 'export Qwen_API_KEY="YOUR_Qwen_API_KEY"' >> ~/.bashrc
         source ~/.bashrc
         ```
 
-3.  **<a id="workspace-gca"></a>Login with Google (Gemini Code Assist for Workspace or licensed Code Assist users):**
+3.  **<a id="workspace-gca"></a>Login with Google (Qwen Code Assist for Workspace or licensed Code Assist users):**
 
-    (For more information, see: https://developers.google.com/gemini-code-assist/resources/faqs#gcp-project-requirement)
+    (For more information, see: https://developers.google.com/Qwen-code-assist/resources/faqs#gcp-project-requirement)
 
     - Use this option if:
 
       1. You have a Google Workspace account. Google Workspace is a paid service for businesses and organizations that provides a suite of productivity tools, including a custom email domain (e.g. your-name@your-company.com), enhanced security features, and administrative controls. These accounts are often managed by an employer or school.
       2. You are a licensed Code Assist user. This can happen if you have previously purchased a Code Assist license or have acquired one through Google Developer Program.
 
-    - If you fall into one of these categories, you must first configure a Google Cloud Project Id to use, [enable the Gemini for Cloud API](https://cloud.google.com/gemini/docs/discover/set-up-gemini#enable-api) and [configure access permissions](https://cloud.google.com/gemini/docs/discover/set-up-gemini#grant-iam). You can temporarily set the environment variable in your current shell session using the following command:
+    - If you fall into one of these categories, you must first configure a Google Cloud Project Id to use, [enable the Qwen for Cloud API](https://cloud.google.com/Qwen/docs/discover/set-up-Qwen#enable-api) and [configure access permissions](https://cloud.google.com/Qwen/docs/discover/set-up-Qwen#grant-iam). You can temporarily set the environment variable in your current shell session using the following command:
       ```bash
       export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
       ```
@@ -52,8 +52,8 @@ The Gemini CLI requires you to authenticate with an AI service provider. On init
       echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.bashrc
       source ~/.bashrc
       ```
-    - During startup, Gemini CLI will direct you to a webpage for authentication. Once authenticated, your credentials will be cached locally so the web login can be skipped on subsequent runs.
-    - Note that the web login must be done in a browser that can communicate with the machine Gemini CLI is being run from. (Specifically, the browser will be redirected to a localhost url that Gemini CLI will be listening on).
+    - During startup, Qwen CLI will direct you to a webpage for authentication. Once authenticated, your credentials will be cached locally so the web login can be skipped on subsequent runs.
+    - Note that the web login must be done in a browser that can communicate with the machine Qwen CLI is being run from. (Specifically, the browser will be redirected to a localhost url that Qwen CLI will be listening on).
 
 4.  **Vertex AI:**
     - If not using express mode:
@@ -93,7 +93,7 @@ The Gemini CLI requires you to authenticate with an AI service provider. On init
 
 5.  **<a id="qwen-dashscope"></a>Qwen/DashScope API key:**
 
-    - Qwen models from Alibaba Cloud provide an alternative to Google's Gemini models with similar capabilities.
+    - Qwen models from Alibaba Cloud provide an alternative to Google's Qwen models with similar capabilities.
     - Obtain your API key from DashScope Console: [https://dashscope.console.aliyun.com/](https://dashscope.console.aliyun.com/)
     - Set the `QWEN_API_KEY` or `DASHSCOPE_API_KEY` environment variable. In the following methods, replace `YOUR_QWEN_API_KEY` with the API key you obtained from DashScope:
       - You can temporarily set the environment variable in your current shell session using the following command:

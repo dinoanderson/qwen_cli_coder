@@ -1,0 +1,32 @@
+/* WebApp.css - Main application layout */
+
+.web-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  background: #fafafa;
+  color: #333;
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .web-app {
+    background: #1a1a1a;
+    color: #e5e5e5;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-body {
+    flex-direction: column;
+  }
+}

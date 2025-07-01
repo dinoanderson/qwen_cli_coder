@@ -57,7 +57,7 @@ export const enTranslations: Translations = {
     },
     mcp: {
       name: 'mcp',
-      description: 'list configured MCP servers and tools',
+      description: 'manage MCP servers. Subcommands: browse, search, install, or list current servers',
     },
     'setup-mcp': {
       name: 'setup-mcp',

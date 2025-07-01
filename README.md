@@ -28,6 +28,26 @@ With the Qwen CLI you can:
 - **Switch between multiple Qwen models** with an intuitive dialog interface
 - **Use the CLI in Chinese or English** with full localization support
 - **Multi-agent task coordination** for parallel processing and complex workflows
+- **Assistant Mode** with a modern web interface for non-technical users
+
+## 🌐 Assistant Mode (New!)
+
+Launch Qwen CLI with a user-friendly web interface perfect for non-technical users:
+
+```bash
+# Start in assistant mode
+node bundle/qwen.js --assistant
+```
+
+This opens a modern chat interface in your browser with:
+- **📎 File Upload Support** - Upload images, videos, documents, and any file type
+- **🖼️ Visual File Processing** - Qwen analyzes images and documents in context
+- **💬 Familiar Chat Interface** - Similar to ChatGPT/Claude for ease of use
+- **🔧 Full Tool Access** - All CLI capabilities available through the web interface
+- **📁 Session-Based Storage** - Temporary file management with automatic cleanup
+- **🌓 Dark Mode Support** - Automatic theme detection based on system preferences
+
+Perfect for team members who need AI assistance without command-line expertise!
 
 ## Quickstart
 

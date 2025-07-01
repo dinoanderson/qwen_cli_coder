@@ -1,0 +1,153 @@
+/* Header.css - Application header */
+
+.app-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  z-index: 1000;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  font-size: 18px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.app-icon {
+  font-size: 20px;
+}
+
+.model-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.model-label {
+  font-weight: 500;
+}
+
+.model-name {
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 16px;
+}
+
+.connection-status.connected {
+  background: #e8f5e8;
+  color: #2d5a2d;
+}
+
+.connection-status.disconnected {
+  background: #fdeaea;
+  color: #c53030;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.connected .status-indicator {
+  background: #38a169;
+}
+
+.disconnected .status-indicator {
+  background: #e53e3e;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: #2d2d2d;
+    border-bottom-color: #404040;
+    color: #e5e5e5;
+  }
+
+  .sidebar-toggle {
+    color: #ccc;
+  }
+
+  .sidebar-toggle:hover {
+    background: #404040;
+    color: #fff;
+  }
+
+  .model-info {
+    color: #ccc;
+  }
+
+  .model-name {
+    background: #404040;
+    color: #e5e5e5;
+  }
+
+  .connection-status.connected {
+    background: #1a2e1a;
+    color: #68d391;
+  }
+
+  .connection-status.disconnected {
+    background: #2d1b1b;
+    color: #fc8181;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .header-center {
+    display: none;
+  }
+
+  .app-title .app-name {
+    display: none;
+  }
+}

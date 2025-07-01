@@ -25,6 +25,7 @@ import { useAuthCommand } from './hooks/useAuthCommand.js';
 import { useLanguageCommand } from './hooks/useLanguageCommand.js';
 import { useModelCommand } from './hooks/useModelCommand.js';
 import { useEditorSettings } from './hooks/useEditorSettings.js';
+import { useMcpCommand } from './hooks/useMcpCommand.js';
 import { useSlashCommandProcessor } from './hooks/slashCommandProcessor.js';
 import { useAutoAcceptIndicator } from './hooks/useAutoAcceptIndicator.js';
 import { useConsoleMessages } from './hooks/useConsoleMessages.js';
@@ -40,6 +41,10 @@ import { AuthInProgress } from './components/AuthInProgress.js';
 import { LanguageDialog } from './components/LanguageDialog.js';
 import { ModelDialog } from './components/ModelDialog.js';
 import { EditorSettingsDialog } from './components/EditorSettingsDialog.js';
+import { McpMenuDialog } from './components/McpMenuDialog.js';
+import { McpBrowseDialog } from './components/McpBrowseDialog.js';
+import { McpSearchDialog } from './components/McpSearchDialog.js';
+import { McpInstallDialog } from './components/McpInstallDialog.js';
 import { Colors } from './colors.js';
 import { Help } from './components/Help.js';
 import { loadHierarchicalGeminiMemory } from '../config/config.js';
@@ -187,6 +192,23 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     exitEditorDialog,
   } = useEditorSettings(settings, setEditorError, addItem);
 
+  const {
+    isMcpMenuDialogOpen,
+    openMcpMenuDialog,
+    handleMcpMenuSelect,
+    isMcpBrowseDialogOpen,
+    openMcpBrowseDialog,
+    handleMcpBrowseSelect,
+    isMcpSearchDialogOpen,
+    openMcpSearchDialog,
+    handleMcpSearchSelect,
+    isMcpInstallDialogOpen,
+    openMcpInstallDialog,
+    handleMcpInstallSelect,
+    mcpError,
+    setMcpError,
+  } = useMcpCommand(settings, addItem);
+
   const toggleCorgiMode = useCallback(() => {
     setCorgiMode((prev) => !prev);
   }, []);
@@ -296,6 +318,10 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     toggleCorgiMode,
     showToolDescriptions,
     setQuittingMessages,
+    openMcpMenuDialog,
+    openMcpBrowseDialog,
+    openMcpSearchDialog,
+    openMcpInstallDialog,
   );
   const pendingHistoryItems = [...pendingSlashCommandHistoryItems];
 
@@ -755,6 +781,48 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
                 onSelect={handleEditorSelect}
                 settings={settings}
                 onExit={exitEditorDialog}
+              />
+            </Box>
+          ) : isMcpMenuDialogOpen ? (
+            <Box flexDirection="column">
+              <McpMenuDialog
+                onSelect={handleMcpMenuSelect}
+              />
+            </Box>
+          ) : isMcpBrowseDialogOpen ? (
+            <Box flexDirection="column">
+              {mcpError && (
+                <Box marginBottom={1}>
+                  <Text color={Colors.AccentRed}>{mcpError}</Text>
+                </Box>
+              )}
+              <McpBrowseDialog
+                onSelect={handleMcpBrowseSelect}
+                error={mcpError}
+              />
+            </Box>
+          ) : isMcpSearchDialogOpen ? (
+            <Box flexDirection="column">
+              {mcpError && (
+                <Box marginBottom={1}>
+                  <Text color={Colors.AccentRed}>{mcpError}</Text>
+                </Box>
+              )}
+              <McpSearchDialog
+                onSelect={handleMcpSearchSelect}
+                error={mcpError}
+              />
+            </Box>
+          ) : isMcpInstallDialogOpen ? (
+            <Box flexDirection="column">
+              {mcpError && (
+                <Box marginBottom={1}>
+                  <Text color={Colors.AccentRed}>{mcpError}</Text>
+                </Box>
+              )}
+              <McpInstallDialog
+                onSelect={handleMcpInstallSelect}
+                error={mcpError}
               />
             </Box>
           ) : (

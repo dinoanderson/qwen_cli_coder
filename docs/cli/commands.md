@@ -8,7 +8,7 @@ Slash commands provide meta-level control over the CLI itself.
 
 - **`/bug`**
 
-  - **Description:** File an issue about Gemini CLI. By default, the issue is filed within the GitHub repository for Gemini CLI. The string you enter after `/bug` will become the headline for the bug being filed. The default `/bug` behavior can be modified using the `bugCommand` setting in your `.gemini/settings.json` files.
+  - **Description:** File an issue about Qwen CLI. By default, the issue is filed within the GitHub repository for Qwen CLI. The string you enter after `/bug` will become the headline for the bug being filed. The default `/bug` behavior can be modified using the `bugCommand` setting in your `.Qwen/settings.json` files.
 
 - **`/chat`**
 
@@ -156,14 +156,14 @@ At commands are used to include the content of files or directories as part of y
 
 ## Shell mode & passthrough commands (`!`)
 
-The `!` prefix lets you interact with your system's shell directly from within Gemini CLI.
+The `!` prefix lets you interact with your system's shell directly from within Qwen CLI.
 
 - **`!<shell_command>`**
 
   - **Description:** Execute the given `<shell_command>` in your system's default shell. Any output or errors from the command are displayed in the terminal.
   - **Examples:**
-    - `!ls -la` (executes `ls -la` and returns to Gemini CLI)
-    - `!git status` (executes `git status` and returns to Gemini CLI)
+    - `!ls -la` (executes `ls -la` and returns to Qwen CLI)
+    - `!git status` (executes `git status` and returns to Qwen CLI)
 
 - **`!` (Toggle shell mode)**
 

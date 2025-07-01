@@ -13,7 +13,14 @@
     "url": "https://github.com/dinoanderson/qwen_cli_coder.git"
   },
   "description": "Community fork of Google's Gemini CLI, modified to work with Qwen models from Alibaba Cloud",
-  "keywords": ["ai", "cli", "qwen", "assistant", "coding", "gemini-fork"],
+  "keywords": [
+    "ai",
+    "cli",
+    "qwen",
+    "assistant",
+    "coding",
+    "gemini-fork"
+  ],
   "homepage": "https://github.com/dinoanderson/qwen_cli_coder#readme",
   "bugs": {
     "url": "https://github.com/dinoanderson/qwen_cli_coder/issues"
@@ -35,6 +42,9 @@
     "test:integration:sandbox:none": "QWEN_SANDBOX=false node tests/integration/run-tests.js",
     "test:integration:sandbox:docker": "QWEN_SANDBOX=docker node tests/integration/run-tests.js",
     "test:integration:sandbox:podman": "QWEN_SANDBOX=podman node tests/integration/run-tests.js",
+    "test:wan:mock": "jest --testMatch=**/wan-mock.test.ts --verbose",
+    "test:wan:e2e": "node scripts/test-wan-e2e.js",
+    "test:wan": "npm run test:wan:mock",
     "start": "node scripts/start.js",
     "debug": "cross-env DEBUG=1 node --inspect-brk scripts/start.js",
     "lint:fix": "eslint . --fix && eslint tests --fix",
@@ -68,6 +78,7 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/micromatch": "^4.0.9",
     "@types/mime-types": "^2.1.4",
     "@types/minimatch": "^5.1.2",
@@ -91,7 +102,6 @@
     "typescript-eslint": "^8.30.1",
     "yargs": "^17.7.2"
   },
-  "dependencies": {},
   "author": "Community Fork Contributors",
   "license": "Apache-2.0",
   "originalProject": {
@@ -99,5 +109,8 @@
     "repository": "https://github.com/google-gemini/gemini-cli",
     "author": "Google",
     "license": "Apache-2.0"
+  },
+  "dependencies": {
+    "open": "^10.1.2"
   }
 }

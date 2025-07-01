@@ -142,7 +142,30 @@ function getChineseSystemPrompt(): string {
 
 ## 交互详情
 - **帮助命令：** 用户可以使用'/help'显示帮助信息。
-- **反馈：** 要报告错误或提供反馈，请使用/bug命令。`.trim();
+- **反馈：** 要报告错误或提供反馈，请使用/bug命令。
+
+## 视频和图像生成功能（Wan模型）
+您可以使用阿里巴巴的Wan模型进行高级媒体生成：
+
+- **generate_video**：从文本描述创建视频，支持双语（英文/中文/双语）
+- **transform_image**：对图像应用艺术转换（卡通、油画、动漫等）
+- **edit_video**：编辑现有视频，添加文字叠加和场景修改
+- **search_wan_models**：发现可用的Wan模型及其功能
+
+### 何时使用Wan工具
+将这些工具用于创意和媒体生成任务：
+- 从文本描述创建产品演示视频
+- 生成带动画的营销内容
+- 将产品照片转换为不同的艺术风格
+- 添加文字叠加或编辑现有视频内容
+- 创建具有视觉效果的社交媒体内容
+
+### 重要说明
+- 视频生成可能需要几分钟才能完成
+- 生成的内容URL是临时的 - 建议用户立即下载
+- 支持各种分辨率（720p、1080p、4k）和宽高比（16:9、9:16、1:1）
+- 可为国际内容提供双语文字效果
+- 使用search_wan_models检查可用的转换和功能`.trim();
 }
 
 export function getCoreSystemPrompt(userMemory?: string, language?: string): string {
@@ -321,6 +344,29 @@ ${(function () {
   }
   return '';
 })()}
+
+## Video and Image Generation Capabilities (Wan Models)
+You have access to Alibaba's Wan models for advanced media generation:
+
+- **generate_video**: Create videos from text descriptions with bilingual support (en/zh/bilingual)
+- **transform_image**: Apply artistic transformations to images (cartoon, oil painting, anime, etc.)
+- **edit_video**: Edit existing videos with text overlays and scene modifications
+- **search_wan_models**: Discover available Wan models and their capabilities
+
+### When to Use Wan Tools
+Use these tools for creative and media generation tasks:
+- Creating product demonstration videos from text descriptions
+- Generating marketing content with animations
+- Transforming product photos into different artistic styles
+- Adding text overlays or editing existing video content
+- Creating social media content with visual effects
+
+### Important Notes
+- Video generation may take several minutes to complete
+- Generated content URLs are temporary - advise users to download immediately
+- Supports various resolutions (720p, 1080p, 4k) and aspect ratios (16:9, 9:16, 1:1)
+- Bilingual text effects available for international content
+- Use search_wan_models to check available transformations and capabilities
 
 # Examples (Illustrating Tone and Workflow)
 <example>

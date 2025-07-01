@@ -57,7 +57,7 @@ export const zhTranslations: Translations = {
     },
     mcp: {
       name: 'mcp',
-      description: '列出已配置的MCP服务器和工具',
+      description: '管理MCP服务器。子命令：browse、search、install 或列出当前服务器',
     },
     'setup-mcp': {
       name: 'setup-mcp',

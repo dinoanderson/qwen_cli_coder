@@ -1,6 +1,6 @@
 # Tutorials
 
-This page contains tutorials for interacting with Gemini CLI.
+This page contains tutorials for interacting with Qwen CLI.
 
 ## Setting up a Model Context Protocol (MCP) server
 
@@ -24,7 +24,7 @@ Before you begin, ensure you have the following installed and configured:
 
 #### Configure the MCP server in `settings.json`
 
-In your project's root directory, create or open the [`.gemini/settings.json` file](./configuration.md). Within the file, add the `mcpServers` configuration block, which provides instructions for how to launch the GitHub MCP server.
+In your project's root directory, create or open the [`.Qwen/settings.json` file](./configuration.md). Within the file, add the `mcpServers` configuration block, which provides instructions for how to launch the GitHub MCP server.
 
 ```json
 {
@@ -58,11 +58,11 @@ Use an environment variable to store your GitHub PAT:
 GITHUB_PERSONAL_ACCESS_TOKEN="pat_YourActualGitHubTokenHere"
 ```
 
-Gemini CLI uses this value in the `mcpServers` configuration that you defined in the `settings.json` file.
+Qwen CLI uses this value in the `mcpServers` configuration that you defined in the `settings.json` file.
 
-#### Launch Gemini CLI and verify the connection
+#### Launch Qwen CLI and verify the connection
 
-When you launch Gemini CLI, it automatically reads your configuration and launches the GitHub MCP server in the background. You can then use natural language prompts to ask Gemini CLI to perform GitHub actions. For example:
+When you launch Qwen CLI, it automatically reads your configuration and launches the GitHub MCP server in the background. You can then use natural language prompts to ask Qwen CLI to perform GitHub actions. For example:
 
 ```bash
 "get all open issues assigned to me in the 'foo/bar' repo and prioritize them"

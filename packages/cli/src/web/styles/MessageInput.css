@@ -1,0 +1,167 @@
+/* MessageInput.css - Message input area */
+
+.message-input {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  border-radius: 24px;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease;
+}
+
+.input-container:focus-within {
+  border-color: #007aff;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.file-upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 16px;
+  color: #666;
+}
+
+.file-upload-button:hover {
+  background: #f0f0f0;
+}
+
+.message-textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 8px 0;
+  background: transparent;
+  font-family: inherit;
+  max-height: 200px;
+  min-height: 24px;
+}
+
+.message-textarea::placeholder {
+  color: #999;
+}
+
+.send-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #007aff;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #0056cc;
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.input-help {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.input-help small {
+  color: #999;
+  font-size: 12px;
+}
+
+.input-help kbd {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  .input-container {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .input-container:focus-within {
+    border-color: #007aff;
+  }
+
+  .file-upload-button {
+    color: #ccc;
+  }
+
+  .file-upload-button:hover {
+    background: #404040;
+  }
+
+  .message-textarea {
+    color: #e5e5e5;
+  }
+
+  .message-textarea::placeholder {
+    color: #888;
+  }
+
+  .input-help small {
+    color: #888;
+  }
+
+  .input-help kbd {
+    background: #404040;
+    border-color: #555;
+    color: #e5e5e5;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .input-container {
+    border-radius: 20px;
+    padding: 6px 10px;
+  }
+
+  .message-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .send-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .input-help {
+    display: none; /* Hide keyboard shortcuts on mobile */
+  }
+}

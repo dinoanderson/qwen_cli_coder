@@ -1,0 +1,203 @@
+/* Sidebar.css - Settings sidebar */
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: #fff;
+  border-left: 1px solid #e5e5e5;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.sidebar-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.config-section,
+.actions-section,
+.info-section {
+  margin-bottom: 24px;
+}
+
+.config-section h4,
+.actions-section h4,
+.info-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.config-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.config-item:last-child {
+  border-bottom: none;
+}
+
+.config-item label {
+  font-weight: 500;
+  color: #333;
+}
+
+.config-item span {
+  color: #666;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.action-button:hover {
+  background: #e9ecef;
+}
+
+.action-button:last-child {
+  margin-bottom: 0;
+}
+
+.info-section p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background: #2d2d2d;
+    border-left-color: #404040;
+    color: #e5e5e5;
+  }
+
+  .sidebar-header {
+    border-bottom-color: #404040;
+  }
+
+  .close-button {
+    color: #ccc;
+  }
+
+  .close-button:hover {
+    background: #404040;
+    color: #fff;
+  }
+
+  .config-section h4,
+  .actions-section h4,
+  .info-section h4 {
+    color: #ccc;
+  }
+
+  .config-item {
+    border-bottom-color: #404040;
+  }
+
+  .config-item label {
+    color: #e5e5e5;
+  }
+
+  .config-item span {
+    color: #ccc;
+  }
+
+  .action-button {
+    background: #404040;
+    color: #e5e5e5;
+  }
+
+  .action-button:hover {
+    background: #4a4a4a;
+  }
+
+  .info-section p {
+    color: #ccc;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+}
