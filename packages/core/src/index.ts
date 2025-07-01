@@ -61,9 +61,17 @@ export * from './tools/delegate-task.js';
 export * from './tools/aggregate-results.js';
 export * from './tools/add-mcp-server.js';
 export * from './tools/search-mcp-servers.js';
+export * from './tools/generate-video.js';
+export * from './tools/transform-image.js';
+export * from './tools/generate-image-to-video.js';
+export * from './tools/search-wan-models.js';
 
 // Export services
 export * from './services/mcpRegistry.js';
+
+// Export Wan providers
+export * from './providers/wan/wanContentGenerator.js';
+export * from './providers/wan/wanTypes.js';
 
 // Export telemetry functions
 export * from './telemetry/index.js';

@@ -27,6 +27,12 @@ import { WebSearchTool } from '../tools/web-search.js';
 import { SubAgentTool } from '../tools/sub-agent.js';
 import { DelegateTaskTool } from '../tools/delegate-task.js';
 import { AggregateResultsTool } from '../tools/aggregate-results.js';
+import { AddMcpServerTool } from '../tools/add-mcp-server.js';
+import { SearchMcpServersTool } from '../tools/search-mcp-servers.js';
+import { GenerateVideoTool } from '../tools/generate-video.js';
+import { TransformImageTool } from '../tools/transform-image.js';
+import { GenerateImageToVideoTool } from '../tools/generate-image-to-video.js';
+import { SearchWanModelsTool } from '../tools/search-wan-models.js';
 import { QwenClient } from '../core/client.js';
 import { QWEN_CONFIG_DIR as QWEN_DIR } from '../tools/memoryTool.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
@@ -130,6 +136,7 @@ export interface ConfigParameters {
   bugCommand?: BugCommandSettings;
   model: string;
   extensionContextFilePaths?: string[];
+  assistantMode?: boolean;
 }
 
 export class Config {
@@ -168,6 +175,7 @@ export class Config {
   private readonly bugCommand: BugCommandSettings | undefined;
   private readonly model: string;
   private readonly extensionContextFilePaths: string[];
+  private readonly assistantMode: boolean;
   private modelSwitchedDuringSession: boolean = false;
   flashFallbackHandler?: FlashFallbackHandler;
 
@@ -211,6 +219,7 @@ export class Config {
     this.bugCommand = params.bugCommand;
     this.model = params.model;
     this.extensionContextFilePaths = params.extensionContextFilePaths ?? [];
+    this.assistantMode = params.assistantMode ?? false;
 
     if (params.contextFileName) {
       setQwenMdFilename(params.contextFileName);
@@ -383,6 +392,14 @@ export class Config {
     return this.accessibility;
   }
 
+  getAssistantMode(): boolean {
+    return this.assistantMode;
+  }
+
+  isAssistantMode(): boolean {
+    return this.assistantMode;
+  }
+
   getTelemetryEnabled(): boolean {
     return this.telemetrySettings.enabled ?? false;
   }
@@ -500,6 +517,16 @@ export function createToolRegistry(config: Config): Promise<ToolRegistry> {
   registerCoreTool(SubAgentTool, config);
   registerCoreTool(DelegateTaskTool, config);
   registerCoreTool(AggregateResultsTool, config);
+  registerCoreTool(AddMcpServerTool);
+  registerCoreTool(SearchMcpServersTool);
+  
+  // Register Wan tools only in assistant mode
+  if (config.isAssistantMode()) {
+    registerCoreTool(GenerateVideoTool, config);
+    registerCoreTool(TransformImageTool, config);
+    registerCoreTool(GenerateImageToVideoTool, config);
+    registerCoreTool(SearchWanModelsTool, config);
+  }
   return (async () => {
     await registry.discoverTools();
     return registry;
