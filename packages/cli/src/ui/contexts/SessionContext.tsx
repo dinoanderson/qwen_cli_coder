@@ -32,6 +32,7 @@ interface SessionStatsState {
   cumulative: CumulativeStats;
   currentTurn: CumulativeStats;
   currentResponse: CumulativeStats;
+  conversationTokenCount: number;
 }
 
 // Defines the final "value" of our context, including the state
@@ -42,6 +43,7 @@ interface SessionStatsContextValue {
   addUsage: (
     metadata: GenerateContentResponseUsageMetadata & { apiTimeMs?: number },
   ) => void;
+  updateConversationTokenCount: (tokenCount: number) => void;
 }
 
 // --- Context Definition ---
@@ -108,6 +110,7 @@ export const SessionStatsProvider: React.FC<{ children: React.ReactNode }> = ({
       thoughtsTokenCount: 0,
       apiTimeMs: 0,
     },
+    conversationTokenCount: 0,
   });
 
   // A single, internal worker function to handle all metadata aggregation.
@@ -175,13 +178,21 @@ export const SessionStatsProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   }, []);
 
+  const updateConversationTokenCount = useCallback((tokenCount: number) => {
+    setStats((prevState) => ({
+      ...prevState,
+      conversationTokenCount: tokenCount,
+    }));
+  }, []);
+
   const value = useMemo(
     () => ({
       stats,
       startNewTurn,
       addUsage: aggregateTokens,
+      updateConversationTokenCount,
     }),
-    [stats, startNewTurn, aggregateTokens],
+    [stats, startNewTurn, aggregateTokens, updateConversationTokenCount],
   );
 
   return (

@@ -30,6 +30,11 @@ import {
   toQwenEmbedRequest,
   fromQwenEmbedResponse,
 } from './qwenMappers.js';
+import {
+  parseThinkingContent,
+  hasThinkingTags,
+  stripThinkingTags,
+} from './qwenThinkingProcessor.js';
 
 export class QwenContentGenerator implements ContentGenerator {
   private readonly apiKey: string;
@@ -99,7 +104,11 @@ export class QwenContentGenerator implements ContentGenerator {
         index: 0,
         message: {
           role: 'assistant',
-          content: data.output?.text || data.output?.choices?.[0]?.message?.content || '',
+          content: (() => {
+            const rawContent = data.output?.text || data.output?.choices?.[0]?.message?.content || '';
+            // Strip thinking tags from non-streaming responses
+            return stripThinkingTags(rawContent);
+          })(),
           function_call: data.output?.tool_calls?.[0] ? {
             name: data.output.tool_calls[0].function?.name || '',
             arguments: JSON.stringify(data.output.tool_calls[0].function?.arguments || {}),
@@ -128,6 +137,9 @@ export class QwenContentGenerator implements ContentGenerator {
   ): AsyncGenerator<GenerateContentResponse> {
     // Track accumulated function call data
     let accumulatedFunctionCall: { name?: string; arguments?: string } | null = null;
+    // Track accumulated thinking content across chunks
+    let accumulatedContent = '';
+    let lastThoughtSummary: any = null;
     const qwenRequest = toQwenGenerateRequest(request, this.enableThinking);
     qwenRequest.model = this.model;
     qwenRequest.stream = true;
@@ -259,30 +271,75 @@ export class QwenContentGenerator implements ContentGenerator {
                 finishReason = choice.finish_reason;
               }
               
-              // If we have text content, yield it
+              // If we have text content, process it for thinking tokens
               if (textContent !== null) {
-                const streamResponse: QwenStreamResponse = {
-                  id: parsed.request_id || 'qwen-stream-' + Date.now(),
-                  object: 'chat.completion.chunk',
-                  created: Date.now() / 1000,
-                  model: this.model,
-                  choices: [{
-                    index: 0,
-                    delta: {
-                      role: 'assistant',
-                      content: textContent,
-                    },
-                    finish_reason: finishReason === 'null' ? null : finishReason,
-                  }],
-                  // Include usage data from final chunk when stream completes
-                  usage: (finishReason && finishReason !== 'null' && parsed.usage) ? {
-                    prompt_tokens: parsed.usage.input_tokens || 0,
-                    completion_tokens: parsed.usage.output_tokens || 0,
-                    total_tokens: parsed.usage.total_tokens || 0,
-                  } : undefined,
-                };
+                // Accumulate content to handle partial thinking blocks across chunks
+                accumulatedContent += textContent;
+                
+                // Parse thinking content from accumulated text
+                const thinkingResult = parseThinkingContent(accumulatedContent);
+                
+                // If we have complete thinking content, emit a thought event
+                if (thinkingResult.hasThinking && thinkingResult.thoughtSummary) {
+                  // Only emit if this is a new or different thought
+                  if (!lastThoughtSummary || 
+                      lastThoughtSummary.subject !== thinkingResult.thoughtSummary.subject ||
+                      lastThoughtSummary.description !== thinkingResult.thoughtSummary.description) {
+                    
+                    // Create a stream response with thought formatting
+                    const thoughtStreamResponse: QwenStreamResponse = {
+                      id: parsed.request_id || 'qwen-thought-' + Date.now(),
+                      object: 'chat.completion.chunk',
+                      created: Date.now() / 1000,
+                      model: this.model,
+                      choices: [{
+                        index: 0,
+                        delta: {
+                          role: 'assistant',
+                          content: `**${thinkingResult.thoughtSummary.subject}** ${thinkingResult.thoughtSummary.description}`,
+                        },
+                        finish_reason: null,
+                      }],
+                    };
+                    
+                    // Convert to GenerateContentResponse and add thought flag
+                    const thoughtResponse = fromQwenStreamResponse(thoughtStreamResponse);
+                    if (thoughtResponse.candidates?.[0]?.content?.parts?.[0]) {
+                      // Mark the first part as a thought
+                      (thoughtResponse.candidates[0].content.parts[0] as any).thought = true;
+                    }
+                    
+                    yield thoughtResponse;
+                    lastThoughtSummary = thinkingResult.thoughtSummary;
+                  }
+                }
+                
+                // Yield regular content (with thinking tags stripped)
+                const displayContent = thinkingResult.regularContent || textContent;
+                if (displayContent) {
+                  const streamResponse: QwenStreamResponse = {
+                    id: parsed.request_id || 'qwen-stream-' + Date.now(),
+                    object: 'chat.completion.chunk',
+                    created: Date.now() / 1000,
+                    model: this.model,
+                    choices: [{
+                      index: 0,
+                      delta: {
+                        role: 'assistant',
+                        content: displayContent,
+                      },
+                      finish_reason: finishReason === 'null' ? null : finishReason,
+                    }],
+                    // Include usage data from final chunk when stream completes
+                    usage: (finishReason && finishReason !== 'null' && parsed.usage) ? {
+                      prompt_tokens: parsed.usage.input_tokens || 0,
+                      completion_tokens: parsed.usage.output_tokens || 0,
+                      total_tokens: parsed.usage.total_tokens || 0,
+                    } : undefined,
+                  };
 
-                yield fromQwenStreamResponse(streamResponse);
+                  yield fromQwenStreamResponse(streamResponse);
+                }
                 
                 // Check for completion
                 if (finishReason && finishReason !== 'null') {
