@@ -143,6 +143,62 @@ If you prefer manual configuration, add to your `.qwen/settings.json`:
 - `/setup-mcp` - Show available MCP setup options
 - `/tools` - List all available tools including web search
 
+### 🔧 Dynamic MCP Server Management
+The CLI now features advanced MCP server management capabilities with interactive dialogs and AI-powered installation:
+
+**Interactive MCP Menu:**
+```bash
+# Launch the interactive MCP management interface
+/mcp
+```
+
+This opens a comprehensive menu with four options:
+- **🔍 Browse Servers** - Explore MCP servers by category (Development, Search, Database, etc.)
+- **🔎 Search Servers** - Find servers by name or functionality
+- **📦 Install Server** - Configure and install servers with scope and trust settings
+- **📋 List Servers** - View currently configured MCP servers
+
+**AI-Powered Installation:**
+The CLI can now install MCP servers automatically when you need new capabilities:
+
+```text
+> I need to search the web for information
+# AI will automatically install and configure DuckDuckGo search server
+
+> Help me manage my PostgreSQL database
+# AI will find and install the PostgreSQL MCP server
+
+> I want to integrate with Slack
+# AI will discover and set up the Slack MCP server
+```
+
+**Built-in MCP Server Catalog:**
+The CLI includes a curated catalog of popular MCP servers:
+- **DuckDuckGo Search** - Privacy-focused web search
+- **File Manager** - Advanced file operations
+- **GitHub Integration** - Repository and issue management
+- **PostgreSQL** - Database operations
+- **Slack** - Team communication
+- **AWS S3** - Cloud storage management
+- **Memory Server** - Persistent context storage
+- **Cloud Storage** - Multi-cloud file operations
+
+**MCP Tools for AI:**
+- **`add_mcp_server`** - Install and configure MCP servers programmatically
+- **`search_mcp_servers`** - Discover available servers by category or keyword
+
+**Example Workflows:**
+```text
+> Find and install all development-related MCP servers
+# AI will search for and present development tools
+
+> Set up MCP servers for a web development project
+# AI will install servers for search, database, and file management
+
+> Show me what communication servers are available
+# AI will list Slack, Discord, and other communication integrations
+```
+
 ### 🚀 Multi-Agent Task Coordination
 Revolutionary parallel processing capabilities that enable sophisticated workflow automation:
 
