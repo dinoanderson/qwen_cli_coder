@@ -305,7 +305,18 @@ export class QwenClient {
         throw error;
       }
       try {
-        return JSON.parse(text);
+        // Strip markdown code blocks if present (Qwen sometimes wraps JSON in ```json ... ```)
+        let jsonText = text.trim();
+        if (jsonText.startsWith('```json') && jsonText.endsWith('```')) {
+          jsonText = jsonText.slice(7, -3).trim();
+        } else if (jsonText.startsWith('```') && jsonText.endsWith('```')) {
+          // Handle generic code blocks
+          const firstNewline = jsonText.indexOf('\n');
+          if (firstNewline !== -1) {
+            jsonText = jsonText.slice(firstNewline + 1, -3).trim();
+          }
+        }
+        return JSON.parse(jsonText);
       } catch (parseError) {
         await reportError(
           parseError,

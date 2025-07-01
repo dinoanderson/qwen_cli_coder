@@ -29,7 +29,7 @@ With the Qwen CLI you can:
 - **Use the CLI in Chinese or English** with full localization support
 - **Multi-agent task coordination** for parallel processing and complex workflows
 - **Assistant Mode** with a modern web interface for non-technical users
-- **Media Generation with Wan Models** - Create videos from text/images and transform images (Assistant Mode only)
+- **🎬 Media Generation with Wan Models** - Create videos from text/images and transform images (Assistant Mode only)
 
 ## 🌐 Assistant Mode (New!)
 
@@ -51,6 +51,32 @@ This opens a modern chat interface in your browser with:
 - **🌓 Dark Mode Support** - Automatic theme detection based on system preferences
 
 Perfect for team members who need AI assistance without command-line expertise!
+
+### 🎬 Media Generation with Wan Models (Assistant Mode Exclusive)
+
+In Assistant Mode, you gain access to Alibaba's powerful Wan media generation models:
+
+**Available Tools:**
+- **`generate_video`** - Create videos from text descriptions with multilingual support
+- **`transform_image`** - Apply artistic transformations (cartoon, oil painting, anime, etc.)
+- **`generate_image_to_video`** - Convert static images into dynamic videos
+- **`search_wan_models`** - Discover available models and their capabilities
+
+**Example Use Cases:**
+- Create product demonstration videos from descriptions
+- Transform product photos into different artistic styles
+- Generate marketing content with animations
+- Convert uploaded images into engaging videos
+
+**Quick Example:**
+```text
+# In Assistant Mode
+> Transform this product photo into a cartoon style
+> Create a 10-second video showing "a modern office with people collaborating"
+> Convert my uploaded image into a 5-second video with a waving motion
+```
+
+For detailed Wan tools documentation, see the [Wan Integration Guide](./docs/wan-integration.md).
 
 ## Quickstart
 
