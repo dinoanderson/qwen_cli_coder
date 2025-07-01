@@ -4,6 +4,32 @@ This guide provides solutions to common issues and debugging tips.
 
 ## Authentication
 
+### Qwen API Configuration
+
+- **Error: API connection failed or timeout errors**
+
+  - **Cause:** Incorrect base URL for your region
+  - **Solution:** Set the correct `QWEN_BASE_URL` based on your location:
+    ```bash
+    # For Chinese mainland users:
+    export QWEN_BASE_URL="https://dashscope.aliyuncs.com/api/v1"
+    
+    # For international users:
+    export QWEN_BASE_URL="https://dashscope-intl.aliyuncs.com/api/v1"
+    ```
+
+- **Error: `Invalid API key` or authentication failures**
+
+  - **Cause:** Missing or incorrect Qwen API key
+  - **Solution:** Ensure your DashScope API key is properly set:
+    ```bash
+    export DASHSCOPE_API_KEY="your-api-key-here"
+    # or
+    export QWEN_API_KEY="your-api-key-here"
+    ```
+
+### Legacy Gemini Authentication
+
 - **Error: `Failed to login. Message: Request contains an invalid argument`**
 
   - Users with Google Workspace accounts, or users with Google Cloud accounts

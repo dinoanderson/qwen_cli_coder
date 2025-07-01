@@ -49,11 +49,18 @@ With the Qwen CLI you can:
    node bundle/qwen.js
    ```
 
-4. **Set up Authentication:** Configure your Qwen API key from Alibaba Cloud DashScope:
+4. **Set up Authentication:** Configure your Qwen API key and base URL from Alibaba Cloud DashScope:
    ```bash
    export DASHSCOPE_API_KEY="your-api-key-here"
    # or
    export QWEN_API_KEY="your-api-key-here"
+   
+   # Base URL (choose based on your region):
+   # For Chinese mainland users:
+   export QWEN_BASE_URL="https://dashscope.aliyuncs.com/api/v1"
+   
+   # For international users:
+   export QWEN_BASE_URL="https://dashscope-intl.aliyuncs.com/api/v1"
    ```
 
 5. **Pick a color theme** and start using the CLI!
@@ -66,6 +73,12 @@ You are now ready to use the Qwen CLI fork!
 2. Navigate to the API Keys section in your dashboard
 3. Create a new API key for DashScope services
 4. Set it as an environment variable as shown above
+
+**Important Regional Configuration:**
+- **Chinese mainland users**: Use `https://dashscope.aliyuncs.com/api/v1`
+- **International users**: Use `https://dashscope-intl.aliyuncs.com/api/v1`
+
+The CLI will automatically detect and use the appropriate endpoint based on your `QWEN_BASE_URL` setting. If not set, it defaults to the international endpoint.
 
 ### Supported Models
 

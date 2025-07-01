@@ -49,11 +49,18 @@
    node bundle/qwen.js
    ```
 
-4. **设置认证:** 配置您的阿里云 DashScope 通义千问 API 密钥：
+4. **设置认证:** 配置您的阿里云 DashScope 通义千问 API 密钥和基础URL：
    ```bash
    export DASHSCOPE_API_KEY="your-api-key-here"
    # 或
    export QWEN_API_KEY="your-api-key-here"
+   
+   # 基础URL（根据您的地区选择）：
+   # 中国大陆用户：
+   export QWEN_BASE_URL="https://dashscope.aliyuncs.com/api/v1"
+   
+   # 国际用户：
+   export QWEN_BASE_URL="https://dashscope-intl.aliyuncs.com/api/v1"
    ```
 
 5. **选择一个颜色主题**，开始使用 CLI！
@@ -66,6 +73,12 @@
 2. 导航到仪表板中的 API 密钥部分
 3. 为 DashScope 服务创建新的 API 密钥
 4. 按上述说明设置为环境变量
+
+**重要的地区配置:**
+- **中国大陆用户**: 使用 `https://dashscope.aliyuncs.com/api/v1`
+- **国际用户**: 使用 `https://dashscope-intl.aliyuncs.com/api/v1`
+
+CLI 将根据您的 `QWEN_BASE_URL` 设置自动检测并使用适当的端点。如果未设置，默认使用国际端点。
 
 ### 支持的模型
 
