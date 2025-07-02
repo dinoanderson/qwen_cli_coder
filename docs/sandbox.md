@@ -1,21 +1,17 @@
-# Sandboxing in the Qwen CLI
+# Sandboxing in the Gemini CLI
 
-This document provides a guide to sandboxing in the Qwen CLI, including prerequisites, quickstart, and configuration.
+This document provides a guide to sandboxing in the Gemini CLI, including prerequisites, quickstart, and configuration.
 
 ## Prerequisites
 
-Before using sandboxing, you need to install and set up the Qwen CLI:
+Before using sandboxing, you need to install and set up the Gemini CLI:
 
 ```bash
-# Clone and build qwen-cli (community fork)
-git clone https://github.com/[your-username]/qwen-cli-fork
-cd qwen-cli-fork
-npm install
-npm run build
-npm run bundle
+# install gemini-cli with npm
+npm install -g @google/gemini-cli
 
 # Verify installation
-node bundle/qwen.js --version
+gemini --version
 ```
 
 ## Overview of sandboxing
@@ -49,13 +45,13 @@ Cross-platform sandboxing with complete process isolation.
 
 ```bash
 # Enable sandboxing with command flag
-node bundle/qwen.js -s -p "analyze the code structure"
+gemini -s -p "analyze the code structure"
 
 # Use environment variable
-export QWEN_SANDBOX=true
-node bundle/qwen.js -p "run the test suite"
+export GEMINI_SANDBOX=true
+gemini -p "run the test suite"
 
-# Configure in .qwen/settings.json
+# Configure in settings.json
 {
   "sandbox": "docker"
 }
@@ -66,8 +62,8 @@ node bundle/qwen.js -p "run the test suite"
 ### Enable sandboxing (in order of precedence)
 
 1. **Command flag**: `-s` or `--sandbox`
-2. **Environment variable**: `QWEN_SANDBOX=true|docker|podman|sandbox-exec`
-3. **Settings file**: `"sandbox": true` in `.qwen/settings.json`
+2. **Environment variable**: `GEMINI_SANDBOX=true|docker|podman|sandbox-exec`
+3. **Settings file**: `"sandbox": true` in `settings.json`
 
 ### macOS Seatbelt profiles
 
@@ -110,17 +106,17 @@ export SANDBOX_SET_UID_GID=false  # Disable UID/GID mapping
 ### Debug mode
 
 ```bash
-DEBUG=1 node bundle/qwen.js -s -p "debug command"
+DEBUG=1 gemini -s -p "debug command"
 ```
 
 ### Inspect sandbox
 
 ```bash
 # Check environment
-node bundle/qwen.js -s -p "run shell command: env | grep SANDBOX"
+gemini -s -p "run shell command: env | grep SANDBOX"
 
 # List mounts
-node bundle/qwen.js -s -p "run shell command: mount | grep workspace"
+gemini -s -p "run shell command: mount | grep workspace"
 ```
 
 ## Security notes

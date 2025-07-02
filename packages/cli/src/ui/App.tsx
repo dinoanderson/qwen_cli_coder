@@ -958,7 +958,6 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
               sessionStats.currentResponse.candidatesTokenCount
             }
             totalTokenCount={sessionStats.currentResponse.totalTokenCount}
-            conversationTokenCount={sessionStats.conversationTokenCount}
           />
         </Box>
       </Box>

@@ -101,37 +101,13 @@ export const useQwenStream = (
     useStateAndRef<HistoryItemWithoutId | null>(null);
   const processedMemoryToolsRef = useRef<Set<string>>(new Set());
   const logger = useLogger();
-  const { startNewTurn, addUsage, updateConversationTokenCount } = useSessionStats();
+  const { startNewTurn, addUsage } = useSessionStats();
   const gitService = useMemo(() => {
     if (!config.getProjectRoot()) {
       return;
     }
     return new GitService(config.getProjectRoot());
   }, [config]);
-
-  const calculateAndUpdateConversationTokens = useCallback(async () => {
-    try {
-      const history = await qwenClient.getHistory();
-      if (history.length === 0) {
-        updateConversationTokenCount(0);
-        return;
-      }
-      
-      // Simple estimation based on character count - similar to what Qwen provider does
-      // This is a fallback approach that's reliable and fast
-      const textLength = history
-        .flatMap(h => h.parts || [])
-        .filter(p => p.text)
-        .map(p => p.text?.length || 0)
-        .reduce((a, b) => a + b, 0);
-      
-      const estimatedTokens = Math.ceil(textLength / 4); // Rough estimation: 1 token ≈ 4 characters
-      updateConversationTokenCount(estimatedTokens);
-    } catch (error) {
-      // If token counting fails, don't update - keep the existing count
-      console.warn('Failed to calculate conversation tokens:', error);
-    }
-  }, [qwenClient, updateConversationTokenCount]);
 
   const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
@@ -579,9 +555,6 @@ export const useQwenStream = (
           addItem(pendingHistoryItemRef.current, userMessageTimestamp);
           setPendingHistoryItem(null);
         }
-
-        // Update conversation token count after the conversation is complete
-        await calculateAndUpdateConversationTokens();
       } catch (error: unknown) {
         if (error instanceof UnauthorizedError) {
           onAuthError();
@@ -614,7 +587,6 @@ export const useQwenStream = (
       startNewTurn,
       onAuthError,
       config,
-      calculateAndUpdateConversationTokens,
     ],
   );
 
@@ -738,12 +710,9 @@ export const useQwenStream = (
       );
 
       markToolsAsSubmitted(callIdsToMarkAsSubmitted);
-      await submitQuery(mergePartListUnions(responsesToSend), {
+      submitQuery(mergePartListUnions(responsesToSend), {
         isContinuation: true,
       });
-      
-      // Update conversation token count after tool responses are submitted
-      await calculateAndUpdateConversationTokens();
     };
     void run();
   }, [
@@ -754,7 +723,6 @@ export const useQwenStream = (
     addItem,
     qwenClient,
     performMemoryRefresh,
-    calculateAndUpdateConversationTokens,
   ]);
 
   const pendingHistoryItems = [

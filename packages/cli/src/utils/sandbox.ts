@@ -31,9 +31,9 @@ function getContainerPath(hostPath: string): string {
   return hostPath;
 }
 
-const LOCAL_DEV_SANDBOX_IMAGE_NAME = 'qwen-cli-sandbox';
-const SANDBOX_NETWORK_NAME = 'qwen-cli-sandbox';
-const SANDBOX_PROXY_NAME = 'qwen-cli-sandbox-proxy';
+const LOCAL_DEV_SANDBOX_IMAGE_NAME = 'gemini-cli-sandbox';
+const SANDBOX_NETWORK_NAME = 'gemini-cli-sandbox';
+const SANDBOX_PROXY_NAME = 'gemini-cli-sandbox-proxy';
 const BUILTIN_SEATBELT_PROFILES = [
   'permissive-open',
   'permissive-closed',
