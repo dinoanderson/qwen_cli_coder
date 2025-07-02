@@ -78,18 +78,25 @@ Slash commands provide meta-level control over the CLI itself.
 
 - **`/model`**
 
-  - **Description:** Open a dialog to switch between different Qwen models. Shows detailed information about each model including context window, output tokens, and special capabilities.
+  - **Description:** Open a dialog to switch between different Qwen models and configure thinking mode. Shows detailed information about each model including context window, output tokens, and special capabilities.
   - **Features:**
     - Interactive dialog showing all available Qwen models
-    - Model specifications displayed (context window, output tokens, vision support)
-    - Current model highlighted for easy identification
-    - Seamless switching without restarting the CLI
+    - Model specifications displayed (context window, output tokens, vision support, thinking tokens)
+    - Current model and thinking mode status highlighted
+    - Thinking mode toggle for complex reasoning tasks
+    - Seamless model switching without restarting the CLI
     - Model selection persisted across sessions
+    - Thinking mode changes require CLI restart to take effect
   - **Available Models:**
-    - **qwen-turbo-latest** - Fast model with 1M context window and thinking capabilities
-    - **qwen3-235b-a22b** - Most capable model with 131k context window
+    - **qwen-turbo-latest** - Fast model with 1M context window and 131k thinking tokens
+    - **qwen3-235b-a22b** - Most capable model with 131k context and thinking windows
     - **qwen-vl-plus-latest** - Vision model for image analysis (32k context)
-  - **Usage:** Simply type `/model` to open the selection dialog
+  - **Thinking Mode:**
+    - **OFF** - Standard response mode without thinking tokens
+    - **ON** - Enable thinking tokens for complex reasoning and problem-solving
+    - Models with thinking capabilities display intermediate reasoning steps
+    - Useful for mathematics, coding problems, and complex analysis tasks
+  - **Usage:** Simply type `/model` to open the configuration dialog
 
 - **`/restore`**
 

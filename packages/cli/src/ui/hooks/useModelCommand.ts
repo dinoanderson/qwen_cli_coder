@@ -22,7 +22,7 @@ export function useModelCommand(
   }, []);
 
   const handleModelSelect = useCallback(
-    async (model: string | undefined, scope: SettingScope) => {
+    async (model: string | undefined, scope: SettingScope, thinkingEnabled?: boolean) => {
       setIsModelDialogOpen(false);
       
       if (!model) {
@@ -32,11 +32,14 @@ export function useModelCommand(
 
       try {
         const previousModel = config?.getModel() || 'Unknown';
+        const currentThinking = config?.getContentGeneratorConfig()?.enableThinking || false;
+        const newThinking = thinkingEnabled ?? currentThinking;
         
-        if (model === previousModel) {
+        // Check if anything actually changed
+        if (model === previousModel && newThinking === currentThinking) {
           addItem({
             type: MessageType.INFO,
-            text: `Already using model: ${model}`,
+            text: `Already using model: ${model} with thinking mode ${newThinking ? 'ON' : 'OFF'}`,
           }, Date.now());
           return;
         }
@@ -56,14 +59,27 @@ export function useModelCommand(
         config?.setModel(model);
         const modelInfo = QWEN_MODELS[model as keyof typeof QWEN_MODELS];
         
+        // Handle thinking mode change
+        let thinkingMessage = '';
+        if (newThinking !== currentThinking) {
+          // Note: We can't change thinking mode on the fly without recreating the config
+          // For now, we'll inform the user they need to restart
+          thinkingMessage = `\n\n🧠 Thinking mode ${newThinking ? 'enabled' : 'disabled'}. Please restart Qwen CLI for changes to take effect.\nAlternatively, use: QWEN_ENABLE_THINKING=${newThinking} in your environment.`;
+        }
+        
         // Add success message
         const contextInfo = `Context: ${modelInfo.contextWindow.toLocaleString()} tokens`;
         const outputInfo = `Output: ${modelInfo.maxOutputTokens.toLocaleString()} tokens`;
         const visionInfo = modelInfo.isVisionModel ? ' | Vision: ✅' : '';
+        const thinkingInfo = modelInfo.thinkingWindow ? ` | Thinking: ${modelInfo.thinkingWindow.toLocaleString()} tokens` : '';
+        
+        const changeMessage = model !== previousModel 
+          ? `Switched from ${previousModel} to ${model}` 
+          : `Configuration updated for ${model}`;
         
         addItem({
           type: MessageType.INFO,
-          text: `Switched from ${previousModel} to ${model}\n\n${modelInfo.displayName}\n${contextInfo} | ${outputInfo}${visionInfo}`,
+          text: `${changeMessage}\n\n${modelInfo.displayName}\n${contextInfo} | ${outputInfo}${visionInfo}${thinkingInfo}${thinkingMessage}`,
         }, Date.now());
         
         // Clear any previous errors
@@ -71,10 +87,10 @@ export function useModelCommand(
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        setModelError(`Failed to switch model: ${errorMessage}`);
+        setModelError(`Failed to update configuration: ${errorMessage}`);
         addItem({
           type: MessageType.ERROR,
-          text: `Failed to switch model: ${errorMessage}`,
+          text: `Failed to update configuration: ${errorMessage}`,
         }, Date.now());
       }
     },

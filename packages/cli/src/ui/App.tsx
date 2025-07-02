@@ -768,6 +768,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
                 onSelect={handleModelSelect}
                 onHighlight={handleModelHighlight}
                 currentModel={config?.getModel()}
+                config={config}
               />
             </Box>
           ) : isEditorDialogOpen ? (
