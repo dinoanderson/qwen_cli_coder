@@ -35,9 +35,9 @@ exporters:
   googlecloud:
     project: "${projectId}"
     metric:
-      prefix: "custom.googleapis.com/gemini_cli"
+      prefix: "custom.googleapis.com/qwen_cli"
     log:
-      default_log_name: "gemini_cli"
+      default_log_name: "qwen_cli"
   debug:
     verbosity: detailed
 service:
