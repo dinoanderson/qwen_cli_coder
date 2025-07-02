@@ -56,6 +56,10 @@ export interface Settings {
   bugCommand?: BugCommandSettings;
   checkpointing?: CheckpointingSettings;
   autoConfigureMaxOldSpaceSize?: boolean;
+  
+  // Model and AI configuration
+  model?: string;
+  enableThinking?: boolean;
 
   // Git-aware file filtering settings
   fileFiltering?: {
@@ -131,7 +135,7 @@ export class LoadedSettings {
   setValue(
     scope: SettingScope,
     key: keyof Settings,
-    value: string | Record<string, MCPServerConfig> | undefined,
+    value: string | boolean | Record<string, MCPServerConfig> | undefined,
   ): void {
     const settingsFile = this.forScope(scope);
     // @ts-expect-error - value can be string | Record<string, MCPServerConfig>

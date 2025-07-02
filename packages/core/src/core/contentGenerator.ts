@@ -49,6 +49,7 @@ export async function createContentGeneratorConfig(
   model: string | undefined,
   authType: AuthType | undefined,
   config?: { getModel?: () => string },
+  enableThinking?: boolean,
 ): Promise<ContentGeneratorConfig> {
   
   const qwenApiKey = process.env.QWEN_API_KEY || process.env.DASHSCOPE_API_KEY;
@@ -68,7 +69,10 @@ export async function createContentGeneratorConfig(
 
   contentGeneratorConfig.apiKey = qwenApiKey;
   contentGeneratorConfig.qwenBaseUrl = qwenBaseUrl;
-  contentGeneratorConfig.enableThinking = process.env.QWEN_ENABLE_THINKING === 'true';
+  
+  // Priority: environment variable > settings parameter > default false
+  const envThinking = process.env.QWEN_ENABLE_THINKING === 'true';
+  contentGeneratorConfig.enableThinking = envThinking || enableThinking || false;
 
   return contentGeneratorConfig;
 }

@@ -14,6 +14,7 @@ export function useModelCommand(
   config: Config | null,
   setModelError: (error: string | null) => void,
   addItem: (item: Omit<HistoryItem, 'id'>, timestamp: number) => void,
+  onModelChange?: (model: string) => void,
 ) {
   const [isModelDialogOpen, setIsModelDialogOpen] = useState(false);
 
@@ -55,15 +56,20 @@ export function useModelCommand(
           return;
         }
         
-        // Switch model
+        // Switch model in config
         config?.setModel(model);
         const modelInfo = QWEN_MODELS[model as keyof typeof QWEN_MODELS];
+        
+        // Persist model setting to disk
+        if (model !== previousModel) {
+          settings.setValue(scope, 'model', model);
+        }
         
         // Handle thinking mode change
         let thinkingMessage = '';
         if (newThinking !== currentThinking) {
-          // Note: We can't change thinking mode on the fly without recreating the config
-          // For now, we'll inform the user they need to restart
+          // Persist thinking mode setting to disk
+          settings.setValue(scope, 'enableThinking', newThinking);
           thinkingMessage = `\n\n🧠 Thinking mode ${newThinking ? 'enabled' : 'disabled'}. Please restart Qwen CLI for changes to take effect.\nAlternatively, use: QWEN_ENABLE_THINKING=${newThinking} in your environment.`;
         }
         
@@ -85,6 +91,11 @@ export function useModelCommand(
         // Clear any previous errors
         setModelError(null);
         
+        // Notify App component of model change
+        if (model !== previousModel && onModelChange) {
+          onModelChange(model);
+        }
+        
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         setModelError(`Failed to update configuration: ${errorMessage}`);
@@ -94,7 +105,7 @@ export function useModelCommand(
         }, Date.now());
       }
     },
-    [config, setModelError, addItem],
+    [config, setModelError, addItem, settings, onModelChange],
   );
 
   const handleModelHighlight = useCallback(

@@ -259,7 +259,8 @@ export async function loadCliConfig(
     cwd: process.cwd(),
     fileDiscoveryService: fileService,
     bugCommand: settings.bugCommand,
-    model: argv.model!,
+    model: settings.model || argv.model!,
+    enableThinking: settings.enableThinking,
     extensionContextFilePaths,
     assistantMode: argv.assistant || false,
   });

@@ -135,6 +135,7 @@ export interface ConfigParameters {
   fileDiscoveryService?: FileDiscoveryService;
   bugCommand?: BugCommandSettings;
   model: string;
+  enableThinking?: boolean;
   extensionContextFilePaths?: string[];
   assistantMode?: boolean;
 }
@@ -174,6 +175,7 @@ export class Config {
   private readonly cwd: string;
   private readonly bugCommand: BugCommandSettings | undefined;
   private readonly model: string;
+  private readonly enableThinking: boolean;
   private readonly extensionContextFilePaths: string[];
   private readonly assistantMode: boolean;
   private modelSwitchedDuringSession: boolean = false;
@@ -218,6 +220,7 @@ export class Config {
     this.fileDiscoveryService = params.fileDiscoveryService ?? null;
     this.bugCommand = params.bugCommand;
     this.model = params.model;
+    this.enableThinking = params.enableThinking ?? false;
     this.extensionContextFilePaths = params.extensionContextFilePaths ?? [];
     this.assistantMode = params.assistantMode ?? false;
 
@@ -257,6 +260,7 @@ export class Config {
       modelToUse,
       authMethod,
       this,
+      this.enableThinking,
     );
 
     const gc = new QwenClient(this);
@@ -465,6 +469,10 @@ export class Config {
 
   getExtensionContextFilePaths(): string[] {
     return this.extensionContextFilePaths;
+  }
+
+  getEnableThinking(): boolean {
+    return this.enableThinking;
   }
 
   async getGitService(): Promise<GitService> {

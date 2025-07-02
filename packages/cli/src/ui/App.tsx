@@ -173,7 +173,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     openModelDialog,
     handleModelSelect,
     handleModelHighlight,
-  } = useModelCommand(settings, config, setModelError, addItem);
+  } = useModelCommand(settings, config, setModelError, addItem, setCurrentModel);
 
   useEffect(() => {
     if (settings.merged.selectedAuthType) {
