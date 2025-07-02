@@ -285,11 +285,32 @@ export class QwenClient {
           contents,
         });
 
-      const result = await retryWithBackoff(apiCall, {
-        onPersistent429: async (authType?: string) =>
-          await this.handleFlashFallback(authType),
-        authType: this.config.getContentGeneratorConfig()?.authType,
-      });
+      const result = await retryWithBackoff(
+        apiCall, 
+        {
+          onPersistent429: async (authType?: string) =>
+            await this.handleFlashFallback(authType),
+          authType: this.config.getContentGeneratorConfig()?.authType,
+        },
+        {
+          onAuthRefresh: async () => {
+            const authType = this.config.getContentGeneratorConfig()?.authType;
+            if (authType) {
+              await this.config.refreshAuth(authType);
+            }
+          },
+          refreshApiCall: () => () => this.getContentGenerator().generateContent({
+            model,
+            config: {
+              ...requestConfig,
+              systemInstruction,
+              responseSchema: schema,
+              responseMimeType: 'application/json',
+            },
+            contents,
+          }),
+        }
+      );
 
       const text = getResponseText(result);
       if (!text) {
@@ -386,11 +407,27 @@ export class QwenClient {
           contents,
         });
 
-      const result = await retryWithBackoff(apiCall, {
-        onPersistent429: async (authType?: string) =>
-          await this.handleFlashFallback(authType),
-        authType: this.config.getContentGeneratorConfig()?.authType,
-      });
+      const result = await retryWithBackoff(
+        apiCall, 
+        {
+          onPersistent429: async (authType?: string) =>
+            await this.handleFlashFallback(authType),
+          authType: this.config.getContentGeneratorConfig()?.authType,
+        },
+        {
+          onAuthRefresh: async () => {
+            const authType = this.config.getContentGeneratorConfig()?.authType;
+            if (authType) {
+              await this.config.refreshAuth(authType);
+            }
+          },
+          refreshApiCall: () => () => this.getContentGenerator().generateContent({
+            model: modelToUse,
+            config: requestConfig,
+            contents,
+          }),
+        }
+      );
       return result;
     } catch (error: unknown) {
       if (abortSignal.aborted) {

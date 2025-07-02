@@ -24,7 +24,7 @@ const DEFAULT_RETRY_OPTIONS: RetryOptions = {
 
 /**
  * Default predicate function to determine if a retry should be attempted.
- * Retries on 429 (Too Many Requests) and 5xx server errors.
+ * Retries on 401 (with auth refresh), 429 (Too Many Requests) and 5xx server errors.
  * @param error The error object.
  * @returns True if the error is a transient error, false otherwise.
  */
@@ -32,11 +32,12 @@ function defaultShouldRetry(error: Error | unknown): boolean {
   // Check for common transient error status codes either in message or a status property
   if (error && typeof (error as { status?: number }).status === 'number') {
     const status = (error as { status: number }).status;
-    if (status === 429 || (status >= 500 && status < 600)) {
+    if (status === 401 || status === 429 || (status >= 500 && status < 600)) {
       return true;
     }
   }
   if (error instanceof Error && error.message) {
+    if (error.message.includes('401')) return true;
     if (error.message.includes('429')) return true;
     if (error.message.match(/5\d{2}/)) return true;
   }
@@ -52,16 +53,25 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export interface RetryCallbacks<T> {
+  /** Called when a 401 auth error occurs to refresh authentication */
+  onAuthRefresh?: () => Promise<void>;
+  /** Function to recreate the API call with fresh auth context */
+  refreshApiCall?: () => () => Promise<T>;
+}
+
 /**
  * Retries a function with exponential backoff and jitter.
  * @param fn The asynchronous function to retry.
  * @param options Optional retry configuration.
+ * @param callbacks Optional callbacks for auth refresh and API call recreation.
  * @returns A promise that resolves with the result of the function if successful.
  * @throws The last error encountered if all attempts fail.
  */
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   options?: Partial<RetryOptions>,
+  callbacks?: RetryCallbacks<T>,
 ): Promise<T> {
   const {
     maxAttempts,
@@ -78,13 +88,28 @@ export async function retryWithBackoff<T>(
   let attempt = 0;
   let currentDelay = initialDelayMs;
   let consecutive429Count = 0;
+  let currentFn = fn; // Allow function to be refreshed
 
   while (attempt < maxAttempts) {
     attempt++;
     try {
-      return await fn();
+      return await currentFn();
     } catch (error) {
       const errorStatus = getErrorStatus(error);
+
+      // Handle 401 authentication errors with refresh
+      if (errorStatus === 401 && callbacks?.onAuthRefresh && callbacks?.refreshApiCall) {
+        console.warn(`Authentication failed on attempt ${attempt}, refreshing credentials...`);
+        try {
+          await callbacks.onAuthRefresh();
+          currentFn = callbacks.refreshApiCall(); // Get fresh API call with new auth
+          console.log('Authentication refreshed, retrying with new credentials...');
+          continue; // Retry immediately with new auth
+        } catch (authError) {
+          console.error('Failed to refresh authentication:', authError);
+          // Continue with normal retry logic
+        }
+      }
 
       // Track consecutive 429 errors
       if (errorStatus === 429) {
