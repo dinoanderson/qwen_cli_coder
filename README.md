@@ -150,6 +150,7 @@ Switch between English and Chinese with the `/lang` command:
 Easily switch between Qwen models with the `/model` command:
 - Interactive dialog showing all available models
 - Model specifications (context window, output tokens, vision support)
+- **Thinking Mode Toggle** - Enable/disable chain-of-thought reasoning without restart
 - Seamless switching without restarting the CLI
 
 ### ⌨️ Consistent User Experience
@@ -247,6 +248,13 @@ The CLI includes a curated catalog of popular MCP servers:
 > Show me what communication servers are available
 # AI will list Slack, Discord, and other communication integrations
 ```
+
+### 🛠️ Enhanced Shell Command Handling
+Improved execution for commands with long outputs:
+- **Smart Output Buffering** - Handles commands like `npm run dev` without memory exhaustion
+- **Automatic Timeouts** - Dev server commands get appropriate timeouts (10s for dev servers, 30s default)
+- **Output Truncation** - Large outputs automatically truncated at 1MB with clear indicators
+- **Real-time Updates** - See command output as it streams
 
 ### 🚀 Multi-Agent Task Coordination
 Revolutionary parallel processing capabilities that enable sophisticated workflow automation:
@@ -373,6 +381,16 @@ Leverage the power of parallel processing for complex tasks.
 ```text
 > Organise my PDF invoices by month of expenditure.
 ```
+
+## Technical Improvements
+
+This fork includes several technical enhancements over the original:
+
+- **Complete Telemetry Rebrand** - All telemetry systems properly rebranded from Gemini to Qwen
+- **Enhanced Authentication** - Automatic retry with authentication refresh on API failures
+- **Improved Settings Persistence** - Model and thinking mode preferences saved across sessions
+- **Better Memory Management** - Shell commands with large outputs handled efficiently
+- **Dynamic Configuration** - Change models and thinking modes without losing conversation context
 
 ## Community Fork Notice
 
