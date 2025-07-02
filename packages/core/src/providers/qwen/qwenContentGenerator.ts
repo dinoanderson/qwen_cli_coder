@@ -64,6 +64,8 @@ export class QwenContentGenerator implements ContentGenerator {
         top_p: qwenRequest.top_p,
         max_tokens: qwenRequest.max_tokens,
         ...qwenRequest.extra_body,
+        // Add result_format when thinking is enabled
+        ...(this.enableThinking && { result_format: 'message' }),
         ...(qwenRequest.functions && qwenRequest.functions.length > 0 && {
           functions: qwenRequest.functions,
         }),
@@ -140,6 +142,8 @@ export class QwenContentGenerator implements ContentGenerator {
         max_tokens: qwenRequest.max_tokens,
         incremental_output: true,
         ...qwenRequest.extra_body,
+        // Add result_format when thinking is enabled
+        ...(this.enableThinking && { result_format: 'message' }),
         ...(qwenRequest.functions && qwenRequest.functions.length > 0 && {
           functions: qwenRequest.functions,
         }),
@@ -246,6 +250,7 @@ export class QwenContentGenerator implements ContentGenerator {
               
               // Only process text content if no function call was processed
               let textContent = null;
+              let reasoningContent = null;
               let finishReason = null;
               
               // Check for direct text output (simple streaming format without tools)
@@ -257,6 +262,32 @@ export class QwenContentGenerator implements ContentGenerator {
               else if (choice?.message?.content !== undefined) {
                 textContent = choice.message.content;
                 finishReason = choice.finish_reason;
+              }
+              
+              // Check for reasoning content when thinking is enabled
+              if (choice?.message?.reasoning_content !== undefined) {
+                reasoningContent = choice.message.reasoning_content;
+              }
+              
+              // If we have reasoning content, yield it first (before regular content)
+              if (reasoningContent !== null) {
+                const reasoningResponse: QwenStreamResponse = {
+                  id: parsed.request_id || 'qwen-stream-' + Date.now(),
+                  object: 'chat.completion.chunk',
+                  created: Date.now() / 1000,
+                  model: this.model,
+                  choices: [{
+                    index: 0,
+                    delta: {
+                      role: 'assistant',
+                      content: '', // Empty content for reasoning chunks
+                      reasoning_content: reasoningContent,
+                    },
+                    finish_reason: null, // Don't finish on reasoning chunks
+                  }],
+                };
+
+                yield fromQwenStreamResponse(reasoningResponse);
               }
               
               // If we have text content, yield it

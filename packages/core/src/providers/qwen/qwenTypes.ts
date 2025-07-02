@@ -71,6 +71,7 @@ export interface QwenStreamChoice {
   delta: {
     role?: string;
     content?: string;
+    reasoning_content?: string;
     function_call?: {
       name?: string;
       arguments?: string;

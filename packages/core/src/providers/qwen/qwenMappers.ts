@@ -194,6 +194,16 @@ export function fromQwenStreamResponse(
   const candidates = qwenResponse.choices.map(choice => {
     const parts: Part[] = [];
     
+    // Handle reasoning content as thought parts
+    if (choice.delta.reasoning_content) {
+      // Format reasoning content with bold subject pattern expected by Turn.ts
+      const formattedThought = `**Thinking** ${choice.delta.reasoning_content}`;
+      parts.push({ 
+        text: formattedThought,
+        thought: true 
+      });
+    }
+    
     if (choice.delta.content) {
       parts.push({ text: choice.delta.content });
     }
