@@ -28,6 +28,10 @@ export interface ShellToolParams {
 import { spawn } from 'child_process';
 
 const OUTPUT_UPDATE_INTERVAL_MS = 1000;
+const MAX_OUTPUT_SIZE = 1024 * 1024; // 1MB max output size
+const TRUNCATION_MESSAGE = '\n[Output truncated due to size limit]';
+const DEFAULT_TIMEOUT_MS = 30000; // 30 seconds default timeout
+const DEV_SERVER_TIMEOUT_MS = 10000; // 10 seconds for dev servers
 
 export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
   static Name: string = 'run_shell_command';
@@ -202,9 +206,25 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     let stdout = '';
     let output = '';
     let lastUpdateTime = Date.now();
+    let outputTruncated = false;
+    let stdoutTruncated = false;
+    let stderrTruncated = false;
 
     const appendOutput = (str: string) => {
-      output += str;
+      if (output.length + str.length > MAX_OUTPUT_SIZE) {
+        // Truncate to fit within the limit
+        const remainingSpace = MAX_OUTPUT_SIZE - output.length;
+        if (remainingSpace > 0) {
+          output += str.substring(0, remainingSpace);
+        }
+        if (!outputTruncated) {
+          output += TRUNCATION_MESSAGE;
+          outputTruncated = true;
+        }
+      } else {
+        output += str;
+      }
+      
       if (
         updateOutput &&
         Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS
@@ -220,7 +240,21 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
       // destroying (e.g. shell.stdout.destroy()) can terminate subprocesses via SIGPIPE
       if (!exited) {
         const str = stripAnsi(data.toString());
-        stdout += str;
+        
+        // Limit stdout buffer
+        if (stdout.length + str.length > MAX_OUTPUT_SIZE) {
+          const remainingSpace = MAX_OUTPUT_SIZE - stdout.length;
+          if (remainingSpace > 0) {
+            stdout += str.substring(0, remainingSpace);
+          }
+          if (!stdoutTruncated) {
+            stdout += TRUNCATION_MESSAGE;
+            stdoutTruncated = true;
+          }
+        } else {
+          stdout += str;
+        }
+        
         appendOutput(str);
       }
     });
@@ -229,7 +263,21 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     shell.stderr.on('data', (data: Buffer) => {
       if (!exited) {
         const str = stripAnsi(data.toString());
-        stderr += str;
+        
+        // Limit stderr buffer
+        if (stderr.length + str.length > MAX_OUTPUT_SIZE) {
+          const remainingSpace = MAX_OUTPUT_SIZE - stderr.length;
+          if (remainingSpace > 0) {
+            stderr += str.substring(0, remainingSpace);
+          }
+          if (!stderrTruncated) {
+            stderr += TRUNCATION_MESSAGE;
+            stderrTruncated = true;
+          }
+        } else {
+          stderr += str;
+        }
+        
         appendOutput(str);
       }
     });
@@ -282,10 +330,21 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     };
     abortSignal.addEventListener('abort', abortHandler);
 
+    // Set up timeout - use shorter timeout for dev server commands
+    let timedOut = false;
+    const isDevServerCommand = /\b(dev|serve|watch|start|run dev|run serve)\b/i.test(params.command);
+    const timeoutMs = isDevServerCommand ? DEV_SERVER_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+    
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      abortHandler();
+    }, timeoutMs);
+
     // wait for the shell to exit
     try {
       await new Promise((resolve) => shell.on('exit', resolve));
     } finally {
+      clearTimeout(timeoutId);
       abortSignal.removeEventListener('abort', abortHandler);
     }
 
@@ -316,12 +375,19 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     }
 
     let llmContent = '';
-    if (abortSignal.aborted) {
-      llmContent = 'Command was cancelled by user before it could complete.';
-      if (output.trim()) {
-        llmContent += ` Below is the output (on stdout and stderr) before it was cancelled:\n${output}`;
+    if (abortSignal.aborted || timedOut) {
+      if (timedOut) {
+        llmContent = `Command exceeded timeout of ${timeoutMs / 1000} seconds and was terminated.`;
+        if (isDevServerCommand) {
+          llmContent += '\nNote: Dev server commands typically run indefinitely. Consider running them in the background with "&" or in a separate terminal.';
+        }
       } else {
-        llmContent += ' There was no output before it was cancelled.';
+        llmContent = 'Command was cancelled by user before it could complete.';
+      }
+      if (output.trim()) {
+        llmContent += ` Below is the output (on stdout and stderr) before it was terminated:\n${output}`;
+      } else {
+        llmContent += ' There was no output before it was terminated.';
       }
     } else {
       llmContent = [
@@ -345,7 +411,12 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
         returnDisplayMessage = output;
       } else {
         // Output is empty, let's provide a reason if the command failed or was cancelled
-        if (abortSignal.aborted) {
+        if (timedOut) {
+          returnDisplayMessage = `Command terminated after ${timeoutMs / 1000} seconds timeout.`;
+          if (isDevServerCommand) {
+            returnDisplayMessage += '\nDev servers run indefinitely - try running in background with "&"';
+          }
+        } else if (abortSignal.aborted) {
           returnDisplayMessage = 'Command cancelled by user.';
         } else if (processSignal) {
           returnDisplayMessage = `Command terminated by signal: ${processSignal}`;
