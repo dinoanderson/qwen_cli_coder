@@ -30,6 +30,10 @@ export interface ContentGenerator {
   countTokens(request: CountTokensParameters): Promise<CountTokensResponse>;
 
   embedContent(request: EmbedContentParameters): Promise<EmbedContentResponse>;
+
+  // Optional methods for thinking mode control
+  setEnableThinking?(enable: boolean): void;
+  getEnableThinking?(): boolean;
 }
 
 export enum AuthType {

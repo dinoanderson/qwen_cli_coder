@@ -175,7 +175,7 @@ export class Config {
   private readonly cwd: string;
   private readonly bugCommand: BugCommandSettings | undefined;
   private readonly model: string;
-  private readonly enableThinking: boolean;
+  private enableThinking: boolean;
   private readonly extensionContextFilePaths: string[];
   private readonly assistantMode: boolean;
   private modelSwitchedDuringSession: boolean = false;
@@ -473,6 +473,22 @@ export class Config {
 
   getEnableThinking(): boolean {
     return this.enableThinking;
+  }
+
+  setEnableThinking(enable: boolean): void {
+    // Update internal state
+    this.enableThinking = enable;
+    
+    // Update the config
+    if (this.contentGeneratorConfig) {
+      this.contentGeneratorConfig.enableThinking = enable;
+    }
+    
+    // Update the content generator if it supports thinking mode control
+    const generator = this.qwenClient?.getContentGenerator();
+    if (generator && generator.setEnableThinking) {
+      generator.setEnableThinking(enable);
+    }
   }
 
   async getGitService(): Promise<GitService> {

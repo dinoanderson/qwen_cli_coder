@@ -71,7 +71,7 @@ export class QwenClient {
     );
     this.chat = await this.startChat();
   }
-  private getContentGenerator(): ContentGenerator {
+  getContentGenerator(): ContentGenerator {
     if (!this.contentGenerator) {
       throw new Error('Content generator not initialized');
     }

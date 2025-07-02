@@ -70,7 +70,11 @@ export function useModelCommand(
         if (newThinking !== currentThinking) {
           // Persist thinking mode setting to disk
           settings.setValue(scope, 'enableThinking', newThinking);
-          thinkingMessage = `\n\n🧠 Thinking mode ${newThinking ? 'enabled' : 'disabled'}. Please restart Qwen CLI for changes to take effect.\nAlternatively, use: QWEN_ENABLE_THINKING=${newThinking} in your environment.`;
+          
+          // Update thinking mode dynamically without restart
+          config?.setEnableThinking(newThinking);
+          
+          thinkingMessage = `\n\n🧠 Thinking mode ${newThinking ? 'enabled' : 'disabled'}. Changes take effect immediately!`;
         }
         
         // Add success message

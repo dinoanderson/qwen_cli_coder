@@ -35,7 +35,7 @@ export class QwenContentGenerator implements ContentGenerator {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly model: string;
-  private readonly enableThinking: boolean;
+  private enableThinking: boolean;
   private readonly headers: Record<string, string>;
 
   constructor(config: QwenConfig) {
@@ -384,5 +384,20 @@ export class QwenContentGenerator implements ContentGenerator {
     };
 
     return fromQwenEmbedResponse(qwenEmbedResponse);
+  }
+
+  /**
+   * Set the thinking mode for this content generator.
+   * This allows dynamic updates without recreating the generator.
+   */
+  setEnableThinking(enable: boolean): void {
+    this.enableThinking = enable;
+  }
+
+  /**
+   * Get the current thinking mode status.
+   */
+  getEnableThinking(): boolean {
+    return this.enableThinking;
   }
 }
