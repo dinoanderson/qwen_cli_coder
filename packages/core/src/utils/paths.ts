@@ -88,7 +88,7 @@ export function shortenPath(filePath: string, maxLen: number = 35): string {
   // As a final check, if the result is somehow still too long
   // truncate the result string from the beginning, prefixing with "...".
   if (result.length > maxLen) {
-    return '...' + result.substring(result.length - maxLen - 3);
+    return '...' + result.substring(result.length - (maxLen - 3));
   }
 
   return result;
