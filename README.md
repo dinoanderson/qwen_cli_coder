@@ -383,6 +383,89 @@ Leverage the power of parallel processing for complex tasks.
 > Organise my PDF invoices by month of expenditure.
 ```
 
+## 📊 Telemetry & Conversation Logging
+
+The Qwen CLI includes a comprehensive telemetry system for analyzing interactions and optimizing prompt performance:
+
+### **Conversation Logs**
+View your AI conversations in a human-readable format for analysis and debugging:
+
+```bash
+# View recent conversations
+npm run logs
+
+# View last 5 sessions
+npm run logs -- --last 5
+
+# Follow logs in real-time
+npm run logs:tail
+
+# Export conversations to markdown
+npm run logs:export
+
+# Search for specific content
+npm run logs -- --search "function"
+
+# View specific session
+npm run logs -- --session "session-id-here"
+```
+
+### **Features**
+- **📝 Complete Conversation History** - Captures both user prompts and AI responses
+- **🔧 Tool Call Tracking** - Detailed logging of function executions and results
+- **🎨 Color-Coded Output** - User messages, AI responses, and tool calls distinctly colored
+- **📊 Session Analytics** - Duration, message counts, and tool usage summaries
+- **🔍 Search & Filter** - Find specific conversations or content across sessions
+- **📤 Export Options** - Console, Markdown, and JSON output formats
+
+### **Prompt Analysis**
+Analyze conversation patterns for prompt optimization:
+
+```bash
+# Analyze prompt patterns and generate insights
+npm run telemetry:analyze
+
+# Set up telemetry collection
+npm run telemetry
+```
+
+### **Example Output**
+```
+Session: abc123-def456-789
+Started: 10:30:25 PM 7/3/2025
+Duration: 5m 42s
+Messages: 3 prompts, 8 tools (read_file, edit, write_file)
+
+👤 User [10:30:25 PM]:
+Fix the authentication bug in the login component
+
+🤖 Qwen (qwen3-235b-a22b) [2.3s]:
+I'll help you fix the authentication bug. Let me first examine the login component to understand the issue.
+
+🔧 Tool: read_file [25ms]
+Args: {"file_path": "/src/components/Login.tsx"}
+Status: ✅ Success
+```
+
+### **Configuration**
+Telemetry is automatically enabled in your `.qwen/settings.json`:
+
+```json
+{
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "logPrompts": true,
+    "otlpEndpoint": "http://localhost:4317"
+  }
+}
+```
+
+For detailed telemetry documentation, see:
+- **[Telemetry Usage Guide](./docs/telemetry-usage.md)** - Basic usage and configuration
+- **[Conversation Logs Guide](./docs/telemetry-conversation-logs.md)** - Advanced log viewing and analysis
+- **[Prompt Tuning Guide](./docs/telemetry-prompt-tuning.md)** - Optimizing prompts with telemetry data
+
 ## Technical Improvements
 
 This fork includes several technical enhancements over the original:
@@ -392,6 +475,8 @@ This fork includes several technical enhancements over the original:
 - **Improved Settings Persistence** - Model and thinking mode preferences saved across sessions
 - **Better Memory Management** - Shell commands with large outputs handled efficiently
 - **Dynamic Configuration** - Change models and thinking modes without losing conversation context
+- **Comprehensive Logging System** - Full conversation tracking with analysis tools
+- **Automatic Parallelization** - Smart detection and execution of parallel tasks
 
 ## Community Fork Notice
 
