@@ -8,10 +8,10 @@
     "enableRecursiveFileSearch": true
   },
   "telemetry": {
-    "enabled": true,
-    "target": "local",
     "logPrompts": true,
-    "otlpEndpoint": "http://localhost:4317"
+    "enabled": true,
+    "otlpEndpoint": "http://localhost:4317",
+    "target": "local"
   },
   "mcpServers": {
     "duckduckgo": {

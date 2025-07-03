@@ -294,34 +294,51 @@ const parseConversations = (logPath) => {
           
         case 'qwen_cli.api_response':
           const responseText = event.attributes.response_text || '';
-          let displayText = responseText;
-          let isToolCall = false;
           
           // Check if this is a tool call response (JSON format)
           if (responseText.trim().startsWith('[') && responseText.trim().endsWith(']')) {
             try {
               const toolCalls = JSON.parse(responseText);
               if (Array.isArray(toolCalls) && toolCalls.length > 0 && toolCalls[0].name) {
-                displayText = `🔧 Called ${toolCalls.length} tool(s): ${toolCalls.map(t => t.name).join(', ')}`;
-                isToolCall = true;
+                // This is a tool call - show the actual tool details
+                for (const toolCall of toolCalls) {
+                  conversation.messages.push({
+                    type: 'tool_request',
+                    timestamp: event.timestamp,
+                    name: toolCall.name,
+                    args: toolCall.args || {},
+                    model: event.attributes.model || 'unknown',
+                    duration: event.attributes.duration_ms || 0
+                  });
+                }
               }
             } catch (e) {
-              // Not valid JSON, treat as regular text
-              isToolCall = false;
+              // Not valid JSON, treat as regular text response
+              if (responseText.trim()) {
+                conversation.messages.push({
+                  type: 'response',
+                  timestamp: event.timestamp,
+                  text: responseText,
+                  model: event.attributes.model || 'unknown',
+                  duration: event.attributes.duration_ms || 0,
+                  requestContext: currentRequest,
+                  isToolCall: false
+                });
+              }
             }
-          }
-          
-          // Only add non-empty responses
-          if (displayText.trim()) {
-            conversation.messages.push({
-              type: 'response',
-              timestamp: event.timestamp,
-              text: displayText,
-              model: event.attributes.model || 'unknown',
-              duration: event.attributes.duration_ms || 0,
-              requestContext: currentRequest,
-              isToolCall: isToolCall
-            });
+          } else {
+            // Regular text response
+            if (responseText.trim()) {
+              conversation.messages.push({
+                type: 'response',
+                timestamp: event.timestamp,
+                text: responseText,
+                model: event.attributes.model || 'unknown',
+                duration: event.attributes.duration_ms || 0,
+                requestContext: currentRequest,
+                isToolCall: false
+              });
+            }
           }
           currentRequest = null;
           break;
@@ -380,10 +397,12 @@ const displayConsole = (conversations) => {
     
     // Show summary
     const promptCount = conv.messages.filter(m => m.type === 'prompt').length;
+    const responseCount = conv.messages.filter(m => m.type === 'response').length;
+    const toolRequestCount = conv.messages.filter(m => m.type === 'tool_request').length;
     const toolCount = conv.messages.filter(m => m.type === 'tool').length;
-    const toolTypes = [...new Set(conv.messages.filter(m => m.type === 'tool').map(m => m.name))];
+    const toolTypes = [...new Set(conv.messages.filter(m => m.type === 'tool' || m.type === 'tool_request').map(m => m.name))];
     
-    console.log(gray(`Messages: ${promptCount} prompts, ${toolCount} tools${toolTypes.length > 0 ? ` (${toolTypes.join(', ')})` : ''}`));
+    console.log(gray(`Messages: ${promptCount} prompts, ${responseCount} responses, ${toolRequestCount} tool requests, ${toolCount} tool executions${toolTypes.length > 0 ? ` (${toolTypes.join(', ')})` : ''}`));
     console.log(cyan('─'.repeat(80)));
     
     for (const msg of conv.messages) {
@@ -394,15 +413,16 @@ const displayConsole = (conversations) => {
           break;
           
         case 'response':
-          if (msg.isToolCall) {
-            console.log(bold(magenta(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
-          } else {
-            console.log(bold(blue(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
-          }
+          console.log(bold(blue(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
           if (options.format === 'detailed' && msg.requestContext) {
             console.log(gray(`[Context: ${msg.requestContext.requestText.split('\n')[0]}...]`));
           }
           console.log(white(msg.text));
+          break;
+          
+        case 'tool_request':
+          console.log(bold(magenta(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
+          console.log(white(`[\n  {\n    "name": "${msg.name}",\n    "args": ${JSON.stringify(msg.args, null, 6).replace(/\n/g, '\n    ')}\n  }\n]`));
           break;
           
         case 'tool':
@@ -449,6 +469,11 @@ const exportMarkdown = (conversations) => {
           markdown += `${msg.text}\n\n`;
           break;
           
+        case 'tool_request':
+          markdown += `### 🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]\n\n`;
+          markdown += `\`\`\`json\n[\n  {\n    "name": "${msg.name}",\n    "args": ${JSON.stringify(msg.args, null, 6).replace(/\n/g, '\n    ')}\n  }\n]\n\`\`\`\n\n`;
+          break;
+          
         case 'tool':
           markdown += `### 🔧 Tool: ${msg.name} [${formatDuration(msg.duration)}]\n\n`;
           markdown += `- Status: ${msg.success ? '✅ Success' : '❌ Failed'}\n`;
@@ -479,9 +504,21 @@ const main = async () => {
     
     if (options.search) {
       conversations = conversations.filter(c => 
-        c.messages.some(m => 
-          m.text && m.text.toLowerCase().includes(options.search.toLowerCase())
-        )
+        c.messages.some(m => {
+          // Search in text for prompts and responses
+          if (m.text && m.text.toLowerCase().includes(options.search.toLowerCase())) {
+            return true;
+          }
+          // Search in tool names and args for tool requests and executions
+          if ((m.type === 'tool_request' || m.type === 'tool') && m.name && m.name.toLowerCase().includes(options.search.toLowerCase())) {
+            return true;
+          }
+          // Search in tool args
+          if ((m.type === 'tool_request' || m.type === 'tool') && m.args && JSON.stringify(m.args).toLowerCase().includes(options.search.toLowerCase())) {
+            return true;
+          }
+          return false;
+        })
       );
     }
     
@@ -548,9 +585,18 @@ const main = async () => {
                 let filteredNew = newOrUpdated;
                 if (options.search) {
                   filteredNew = filteredNew.filter(c => 
-                    c.messages.some(m => 
-                      m.text && m.text.toLowerCase().includes(options.search.toLowerCase())
-                    )
+                    c.messages.some(m => {
+                      if (m.text && m.text.toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      if ((m.type === 'tool_request' || m.type === 'tool') && m.name && m.name.toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      if ((m.type === 'tool_request' || m.type === 'tool') && m.args && JSON.stringify(m.args).toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      return false;
+                    })
                   );
                 }
                 
@@ -564,9 +610,18 @@ const main = async () => {
                 let filteredNewMessages = justNewMessages;
                 if (options.search) {
                   filteredNewMessages = filteredNewMessages.filter(c => 
-                    c.messages.some(m => 
-                      m.text && m.text.toLowerCase().includes(options.search.toLowerCase())
-                    )
+                    c.messages.some(m => {
+                      if (m.text && m.text.toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      if ((m.type === 'tool_request' || m.type === 'tool') && m.name && m.name.toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      if ((m.type === 'tool_request' || m.type === 'tool') && m.args && JSON.stringify(m.args).toLowerCase().includes(options.search.toLowerCase())) {
+                        return true;
+                      }
+                      return false;
+                    })
                   );
                 }
                 
@@ -581,12 +636,13 @@ const main = async () => {
                           break;
                           
                         case 'response':
-                          if (msg.isToolCall) {
-                            console.log(bold(magenta(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
-                          } else {
-                            console.log(bold(blue(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
-                          }
+                          console.log(bold(blue(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
                           console.log(white(msg.text));
+                          break;
+                          
+                        case 'tool_request':
+                          console.log(bold(magenta(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
+                          console.log(white(`[\n  {\n    "name": "${msg.name}",\n    "args": ${JSON.stringify(msg.args, null, 6).replace(/\n/g, '\n    ')}\n  }\n]`));
                           break;
                           
                         case 'tool':

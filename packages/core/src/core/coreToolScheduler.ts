@@ -640,6 +640,63 @@ export class CoreToolScheduler {
     }
   }
 
+  cancelAllToolCalls(): void {
+    const activeStatuses: Status[] = [
+      'scheduled',
+      'executing',
+      'validating',
+      'awaiting_approval',
+    ];
+
+    let anyCancelled = false;
+
+    this.toolCalls = this.toolCalls.map((call) => {
+      if (activeStatuses.includes(call.status)) {
+        anyCancelled = true;
+        
+        // Extract common properties from active calls
+        const activeCall = call as ScheduledToolCall | ExecutingToolCall | ValidatingToolCall | WaitingToolCall;
+        const startTime = activeCall.startTime;
+        const tool = activeCall.tool;
+        const outcome = activeCall.outcome;
+        const durationMs = startTime ? Date.now() - startTime : undefined;
+        
+        // Create a cancelled tool call
+        const cancelledCall: CancelledToolCall = {
+          request: call.request,
+          tool,
+          status: 'cancelled',
+          response: {
+            callId: call.request.callId,
+            responseParts: {
+              functionResponse: {
+                id: call.request.callId,
+                name: call.request.name,
+                response: {
+                  error: '[Operation Cancelled] Reason: User cancelled tool execution.',
+                },
+              },
+            },
+            resultDisplay: undefined,
+            error: undefined,
+          },
+          durationMs,
+          outcome,
+        };
+        
+        return cancelledCall;
+      }
+      return call;
+    });
+
+    if (anyCancelled) {
+      // Notify listeners that tool calls have been updated
+      this.notifyToolCallsUpdate();
+      // Check if all calls are now complete
+      this.checkAndNotifyCompletion();
+    }
+  }
+
   private checkAndNotifyCompletion(): void {
     const allCallsAreTerminal = this.toolCalls.every(
       (call) =>

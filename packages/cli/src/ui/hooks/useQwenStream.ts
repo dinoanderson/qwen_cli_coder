@@ -109,7 +109,7 @@ export const useQwenStream = (
     return new GitService(config.getProjectRoot());
   }, [config]);
 
-  const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
+  const [toolCalls, scheduleToolCalls, cancelAllToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
       (completedToolCallsFromScheduler) => {
         // This onComplete is called when ALL scheduled tools for a given batch are done.
@@ -173,24 +173,49 @@ export const useQwenStream = (
   }, [isResponding, toolCalls]);
 
   useInput((_input, key) => {
-    if (streamingState === StreamingState.Responding && key.escape) {
-      if (turnCancelledRef.current) {
-        return;
-      }
-      turnCancelledRef.current = true;
-      abortControllerRef.current?.abort();
-      if (pendingHistoryItemRef.current) {
-        addItem(pendingHistoryItemRef.current, Date.now());
-      }
-      addItem(
-        {
-          type: MessageType.INFO,
-          text: 'Request cancelled.',
-        },
-        Date.now(),
+    if (key.escape) {
+      // Check if we have active tools regardless of streaming state
+      const hasActiveTools = toolCalls.some((tc) =>
+        ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(
+          tc.status,
+        ),
       );
-      setPendingHistoryItem(null);
-      setIsResponding(false);
+      
+      // Allow cancellation if either responding OR tools are active
+      if (streamingState === StreamingState.Responding || 
+          streamingState === StreamingState.WaitingForConfirmation ||
+          hasActiveTools) {
+        
+        if (turnCancelledRef.current) {
+          return;
+        }
+        
+        turnCancelledRef.current = true;
+        abortControllerRef.current?.abort();
+        
+        // Cancel all active tool calls
+        if (hasActiveTools) {
+          cancelAllToolCalls();
+        }
+        
+        // Add any pending history item before cancelling
+        if (pendingHistoryItemRef.current) {
+          addItem(pendingHistoryItemRef.current, Date.now());
+        }
+        
+        // Add cancellation message
+        addItem(
+          {
+            type: MessageType.INFO,
+            text: 'Request cancelled.',
+          },
+          Date.now(),
+        );
+        
+        // Reset all state to ensure clean cancellation
+        setPendingHistoryItem(null);
+        setIsResponding(false);
+      }
     }
   });
 
@@ -203,9 +228,9 @@ export const useQwenStream = (
       queryToSend: PartListUnion | null;
       shouldProceed: boolean;
     }> => {
-      if (turnCancelledRef.current) {
-        return { queryToSend: null, shouldProceed: false };
-      }
+      // Reset cancel flag for new requests to allow subsequent interactions after ESC
+      turnCancelledRef.current = false;
+      
       if (typeof query === 'string' && query.trim().length === 0) {
         return { queryToSend: null, shouldProceed: false };
       }
@@ -520,7 +545,6 @@ export const useQwenStream = (
 
       abortControllerRef.current = new AbortController();
       const abortSignal = abortControllerRef.current.signal;
-      turnCancelledRef.current = false;
 
       const { queryToSend, shouldProceed } = await prepareQueryForGemini(
         query,
