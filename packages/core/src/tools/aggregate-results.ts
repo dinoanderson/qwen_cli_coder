@@ -43,15 +43,21 @@ export class AggregateResultsTool extends BaseTool<AggregateResultsParams, ToolR
 
 This tool provides sophisticated result processing capabilities for multi-agent workflows:
 
+**AUTOMATIC USE - Apply this tool after:**
+- delegate_task completes with multiple results
+- Multiple sub-agents finish their tasks
+- Any parallel operation that produces multiple outputs
+- Research tasks that gather information from multiple sources
+
 **Aggregation Types:**
-- **Summary**: Create a concise summary of all results
+- **Summary**: Create a concise summary of all results (DEFAULT for research)
 - **Merge**: Combine all results into a single coherent document
 - **Compare**: Highlight differences and similarities between results
 - **Analyze**: Perform deeper analysis and extract insights
 - **Custom**: Use custom instructions for specialized processing
 
 **Output Formats:**
-- **Markdown**: Rich formatted output with headers, lists, and emphasis
+- **Markdown**: Rich formatted output with headers, lists, and emphasis (DEFAULT)
 - **Text**: Plain text format for simple consumption
 - **JSON**: Structured data format for programmatic use
 - **Report**: Professional report format with sections and analysis
@@ -69,6 +75,10 @@ This tool provides sophisticated result processing capabilities for multi-agent 
 - Metadata preservation and analysis
 - Flexible grouping and sorting options
 - Custom processing instructions support
+
+**Best Practice:**
+- Always use after delegate_task unless raw results are specifically requested
+- Choose aggregation type based on the nature of the parallel tasks
 
 The tool automatically handles various content types and can extract meaningful insights from diverse result sets.`;
 

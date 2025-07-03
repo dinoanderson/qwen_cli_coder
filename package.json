@@ -67,6 +67,10 @@
     "publish:npm": "npm publish --workspaces ${NPM_PUBLISH_TAG:+--tag=$NPM_PUBLISH_TAG} ${NPM_DRY_RUN:+--dry-run}",
     "publish:release": "npm run build:packages && npm run prepare:cli-packagejson && npm run build:sandbox:fast && npm run publish:sandbox && npm run publish:npm",
     "telemetry": "node scripts/telemetry.js",
+    "telemetry:analyze": "node scripts/analyze-prompts.js",
+    "logs": "node scripts/conversation-logs.js",
+    "logs:tail": "node scripts/conversation-logs.js --tail",
+    "logs:export": "node scripts/conversation-logs.js -o markdown > telemetry-conversations.md",
     "start:gcp": "concurrently --raw --kill-others \"npm run telemetry -- --target=gcp\" \"npm start\""
   },
   "bin": {

@@ -7,11 +7,21 @@
     "respectGitIgnore": true,
     "enableRecursiveFileSearch": true
   },
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "logPrompts": true,
+    "otlpEndpoint": "http://localhost:4317"
+  },
   "mcpServers": {
     "duckduckgo": {
       "command": "npx",
-      "args": ["-y", "@oevortex/ddg_search"],
+      "args": [
+        "-y",
+        "@oevortex/ddg_search"
+      ],
       "timeout": 30000
     }
-  }
+  },
+  "sandbox": false
 }

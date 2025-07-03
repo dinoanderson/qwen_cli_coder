@@ -1,0 +1,25 @@
+{
+  "summary": {
+    "totalSessions": 0,
+    "totalPrompts": 0,
+    "totalResponses": 0,
+    "totalToolCalls": 0,
+    "totalTokensUsed": 0,
+    "averagePromptLength": 0,
+    "averageResponseTime": 0,
+    "averageTokensPerPrompt": 0
+  },
+  "toolUsage": {},
+  "modelUsage": {},
+  "promptPatterns": {
+    "byLength": {
+      "short": 0,
+      "medium": 0,
+      "long": 0,
+      "veryLong": 0
+    },
+    "byHour": {},
+    "topStarters": []
+  },
+  "sessions": []
+}

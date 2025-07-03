@@ -46,6 +46,12 @@ export class DelegateTaskTool extends BaseTool<DelegateTaskParams, ToolResult> {
 
 This tool enables sophisticated task management and coordination:
 
+**AUTOMATIC PARALLELIZATION - Use this tool whenever you detect:**
+- Multiple search targets (e.g., "find X and Y" → create parallel search subtasks)
+- Multiple files to analyze (e.g., "check these 5 files" → parallel file analysis)
+- Independent operations (e.g., "create frontend and backend" → parallel development)
+- Research on multiple topics (e.g., "compare A, B, and C" → parallel research)
+
 **Use Cases:**
 - Break down large, complex tasks into manageable chunks
 - Execute multiple independent operations simultaneously
@@ -53,8 +59,8 @@ This tool enables sophisticated task management and coordination:
 - Manage resource-intensive workflows efficiently
 
 **Execution Modes:**
-- **Parallel**: Execute all subtasks simultaneously (default, faster)
-- **Sequential**: Execute subtasks one after another (safer for dependent tasks)
+- **Parallel**: Execute all subtasks simultaneously (DEFAULT - always use for independent tasks)
+- **Sequential**: Execute subtasks one after another (only for dependent tasks)
 
 **Features:**
 - Intelligent task prioritization and scheduling
@@ -64,6 +70,8 @@ This tool enables sophisticated task management and coordination:
 - Error handling and retry capabilities
 
 **Best Practices:**
+- **DEFAULT TO PARALLEL**: Always use parallel mode unless tasks have dependencies
+- **BE PROACTIVE**: Don't wait for users to request parallelization
 - Make subtasks independent when using parallel mode
 - Use clear, specific task descriptions for better results
 - Set appropriate timeouts for long-running operations

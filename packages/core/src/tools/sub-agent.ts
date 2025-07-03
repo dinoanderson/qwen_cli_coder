@@ -43,10 +43,19 @@ export class SubAgentTool extends BaseTool<SubAgentToolParams, ToolResult> {
 This tool creates a new Qwen CLI instance running in non-interactive mode to complete a delegated task.
 The sub-agent runs independently and can use all available tools to complete its assigned task.
 
+**When to Use (Single Task):**
+- Single, well-defined task that needs isolation
+- Task that requires its own context or working directory
+- When you need just one agent, not multiple
+
+**For Multiple Tasks:**
+- Use delegate_task instead - it's optimized for multiple parallel operations
+- delegate_task provides better coordination and result aggregation
+
 Use this tool when you want to:
-- Delegate independent tasks that can run in parallel
-- Break down complex work into smaller, manageable chunks
-- Perform multiple operations simultaneously
+- Delegate a single independent task
+- Run an isolated operation with specific context
+- Execute a task in a different working directory
 
 The sub-agent will have access to:
 - All available tools (file operations, shell commands, web search, etc.)
@@ -59,7 +68,8 @@ Important considerations:
 - Sub-agents run independently and cannot directly communicate with each other
 - Each sub-agent has its own isolated execution environment
 - Tasks should be well-defined and self-contained
-- Consider timeout limits for long-running tasks`;
+- Consider timeout limits for long-running tasks
+- For multiple tasks, prefer delegate_task for better efficiency`;
 
     const toolParameterSchema: Record<string, unknown> = {
       type: 'object',
