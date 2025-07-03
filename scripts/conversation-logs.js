@@ -507,14 +507,108 @@ const main = async () => {
       console.log(yellow('\n📡 Watching for new conversations... (Ctrl+C to stop)\n'));
       
       let lastSize = fs.statSync(logPath).size;
+      let lastConversationCount = conversations.length;
+      let seenSessionIds = new Set(conversations.map(c => c.sessionId));
+      
       setInterval(() => {
-        const currentSize = fs.statSync(logPath).size;
-        if (currentSize > lastSize) {
-          // Re-parse and show new conversations
-          const newConversations = parseConversations(logPath);
-          // Show only new entries (this is simplified, real implementation would track seen events)
-          console.log(green('\n🔄 New activity detected!\n'));
-          lastSize = currentSize;
+        try {
+          const currentSize = fs.statSync(logPath).size;
+          if (currentSize > lastSize) {
+            // Re-parse and show new conversations
+            const newConversations = parseConversations(logPath);
+            
+            // Find truly new sessions or updated sessions
+            const newOrUpdated = [];
+            const justNewMessages = [];
+            
+            for (const conv of newConversations) {
+              if (!seenSessionIds.has(conv.sessionId)) {
+                // Completely new session
+                seenSessionIds.add(conv.sessionId);
+                newOrUpdated.push(conv);
+              } else {
+                // Check if existing session has new messages
+                const oldConv = conversations.find(c => c.sessionId === conv.sessionId);
+                if (oldConv && conv.messages.length > oldConv.messages.length) {
+                  // Create a conversation object with only the new messages
+                  const newMessagesOnly = {
+                    ...conv,
+                    messages: conv.messages.slice(oldConv.messages.length)
+                  };
+                  justNewMessages.push(newMessagesOnly);
+                }
+              }
+            }
+            
+            if (newOrUpdated.length > 0 || justNewMessages.length > 0) {
+              console.log(green('\n🔄 New activity detected!\n'));
+              
+              // Display new complete sessions
+              if (newOrUpdated.length > 0) {
+                let filteredNew = newOrUpdated;
+                if (options.search) {
+                  filteredNew = filteredNew.filter(c => 
+                    c.messages.some(m => 
+                      m.text && m.text.toLowerCase().includes(options.search.toLowerCase())
+                    )
+                  );
+                }
+                
+                if (filteredNew.length > 0) {
+                  displayConsole(filteredNew);
+                }
+              }
+              
+              // Display just new messages from existing sessions
+              if (justNewMessages.length > 0) {
+                let filteredNewMessages = justNewMessages;
+                if (options.search) {
+                  filteredNewMessages = filteredNewMessages.filter(c => 
+                    c.messages.some(m => 
+                      m.text && m.text.toLowerCase().includes(options.search.toLowerCase())
+                    )
+                  );
+                }
+                
+                if (filteredNewMessages.length > 0) {
+                  for (const conv of filteredNewMessages) {
+                    console.log(cyan(`⬆️  New messages in session: ${conv.sessionId}`));
+                    for (const msg of conv.messages) {
+                      switch (msg.type) {
+                        case 'prompt':
+                          console.log(bold(green(`\n👤 User [${formatTime(msg.timestamp)}]:`)));
+                          console.log(white(msg.text));
+                          break;
+                          
+                        case 'response':
+                          if (msg.isToolCall) {
+                            console.log(bold(magenta(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
+                          } else {
+                            console.log(bold(blue(`\n🤖 Qwen (${msg.model}) [${formatDuration(msg.duration)}]:`)));
+                          }
+                          console.log(white(msg.text));
+                          break;
+                          
+                        case 'tool':
+                          console.log(bold(magenta(`\n🔧 Tool: ${msg.name} [${formatDuration(msg.duration)}]`)));
+                          console.log(gray(`Status: ${msg.success ? '✅ Success' : '❌ Failed'}`));
+                          break;
+                      }
+                    }
+                    console.log();
+                  }
+                }
+              }
+              
+              // Update our tracking
+              conversations = newConversations;
+            }
+            
+            lastSize = currentSize;
+            lastConversationCount = newConversations.length;
+          }
+        } catch (error) {
+          // Ignore errors during tail (file might be being written)
         }
       }, 1000);
     }
