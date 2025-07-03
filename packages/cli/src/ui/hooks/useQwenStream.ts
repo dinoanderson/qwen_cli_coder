@@ -528,6 +528,7 @@ export const useQwenStream = (
       scheduleToolCalls,
       handleChatCompressionEvent,
       addUsage,
+      qwenClient,
     ],
   );
 
