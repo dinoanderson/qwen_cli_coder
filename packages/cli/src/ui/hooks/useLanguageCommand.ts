@@ -6,6 +6,7 @@
 
 import { useCallback, useState } from 'react';
 import { LoadedSettings, SettingScope } from '../../config/settings.js';
+import type { Config } from '@qwen/qwen-cli-core';
 import { 
   Language, 
   setLanguage, 
@@ -17,6 +18,7 @@ import { HistoryItem, MessageType } from '../types.js';
 
 export function useLanguageCommand(
   settings: LoadedSettings,
+  config: Config | null,
   setLanguageError: (error: string | null) => void,
   addItem: (item: Omit<HistoryItem, 'id'>, timestamp: number) => void,
   refreshStatic: () => void,
@@ -49,6 +51,8 @@ export function useLanguageCommand(
         
         // Reinitialize translations
         await initializeTranslations();
+        // Restart chat so new system prompt is used
+        await config?.getQwenClient()?.resetChat();
         
         // Add success message
         addItem({
@@ -73,7 +77,7 @@ export function useLanguageCommand(
         }, Date.now());
       }
     },
-    [settings, setLanguageError, addItem, refreshStatic],
+    [settings, config, setLanguageError, addItem, refreshStatic],
   );
 
   const handleLanguageHighlight = useCallback(

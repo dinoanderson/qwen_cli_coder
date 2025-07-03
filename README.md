@@ -145,6 +145,7 @@ Switch between English and Chinese with the `/lang` command:
 - Full UI translation (menus, help text, command descriptions)
 - System prompts automatically adapt to selected language
 - Settings are persisted across sessions
+- Changing language restarts the chat session so the new system prompt is used
 
 ### 🤖 Dynamic Model Switching
 Easily switch between Qwen models with the `/model` command:

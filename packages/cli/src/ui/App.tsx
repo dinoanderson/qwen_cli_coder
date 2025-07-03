@@ -166,7 +166,7 @@ const App = ({ config, settings, startupWarnings = [] }: AppProps) => {
     openLanguageDialog,
     handleLanguageSelect,
     handleLanguageHighlight,
-  } = useLanguageCommand(settings, setLanguageError, addItem, refreshStatic);
+  } = useLanguageCommand(settings, config, setLanguageError, addItem, refreshStatic);
 
   const {
     isModelDialogOpen,

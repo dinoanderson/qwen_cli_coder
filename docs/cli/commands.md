@@ -48,6 +48,7 @@ Slash commands provide meta-level control over the CLI itself.
     - System prompts automatically adapt to selected language
     - Settings are persisted across sessions
     - Real-time UI refresh after language change
+    - Changing language restarts the chat session so the new system prompt is used
   - **Supported Languages:**
     - **English** (`en`) - Default interface language
     - **中文简体** (`zh`) - Simplified Chinese interface
