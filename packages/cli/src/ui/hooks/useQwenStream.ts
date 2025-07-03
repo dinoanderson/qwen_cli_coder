@@ -123,6 +123,10 @@ export const useQwenStream = (
             Date.now(),
           );
         }
+        
+        // Important: When all tools are complete (including cancelled ones),
+        // the scheduler clears its internal state. We should ensure our
+        // effect doesn't interfere with this cleanup.
       },
       config,
       setPendingHistoryItem,
@@ -726,16 +730,22 @@ export const useQwenStream = (
           }
         }
 
-        const callIdsToMarkAsSubmitted = geminiTools.map(
+        // IMPORTANT: Mark ALL completed tools as submitted, not just Gemini tools
+        // This includes cancelled tools to ensure the streaming state returns to idle
+        const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
           (toolCall) => toolCall.request.callId,
         );
-        markToolsAsSubmitted(callIdsToMarkAsSubmitted);
+        markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
         
         // Ensure we're in a clean state after all tools are cancelled
         // Reset the cancelled flag to allow new inputs
         if (turnCancelledRef.current) {
           turnCancelledRef.current = false;
         }
+        
+        // IMPORTANT: Even though we're not submitting to Gemini, we need to
+        // trigger the completion handler so the scheduler can clear its toolCalls array
+        // This prevents the system from getting stuck with cancelled tools
         return;
       }
 
