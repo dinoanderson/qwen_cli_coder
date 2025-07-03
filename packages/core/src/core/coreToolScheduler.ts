@@ -648,11 +648,8 @@ export class CoreToolScheduler {
       'awaiting_approval',
     ];
 
-    let anyCancelled = false;
-
     this.toolCalls = this.toolCalls.map((call) => {
       if (activeStatuses.includes(call.status)) {
-        anyCancelled = true;
         const startTime = (call as
           | ScheduledToolCall
           | ExecutingToolCall
@@ -694,7 +691,7 @@ export class CoreToolScheduler {
       return call;
     });
 
-    if (anyCancelled) {
+    if (this.toolCalls.length > 0) {
       this.notifyToolCallsUpdate();
       this.checkAndNotifyCompletion();
     }
