@@ -215,6 +215,12 @@ export const useQwenStream = (
         // Reset all state to ensure clean cancellation
         setPendingHistoryItem(null);
         setIsResponding(false);
+        
+        // Reset the cancel flag after all operations are complete
+        // This ensures the system can accept new inputs after cancellation
+        setTimeout(() => {
+          turnCancelledRef.current = false;
+        }, 100);
       }
     }
   });
@@ -724,6 +730,12 @@ export const useQwenStream = (
           (toolCall) => toolCall.request.callId,
         );
         markToolsAsSubmitted(callIdsToMarkAsSubmitted);
+        
+        // Ensure we're in a clean state after all tools are cancelled
+        // Reset the cancelled flag to allow new inputs
+        if (turnCancelledRef.current) {
+          turnCancelledRef.current = false;
+        }
         return;
       }
 
