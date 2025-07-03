@@ -500,6 +500,7 @@ describe('useQwenStream', () => {
     mockUseReactToolScheduler.mockReturnValue([
       [],
       mockScheduleToolCalls,
+      mockCancelAllToolCalls,
       mockMarkToolsAsSubmitted,
     ]);
     const { rerender } = renderHook(() =>
@@ -522,6 +523,7 @@ describe('useQwenStream', () => {
     mockUseReactToolScheduler.mockReturnValue([
       completedToolCalls,
       mockScheduleToolCalls,
+      mockCancelAllToolCalls,
       mockMarkToolsAsSubmitted,
     ]);
 
@@ -565,6 +567,7 @@ describe('useQwenStream', () => {
     mockUseReactToolScheduler.mockReturnValue([
       [],
       mockScheduleToolCalls,
+      mockCancelAllToolCalls,
       mockMarkToolsAsSubmitted,
     ]);
     const { rerender } = renderHook(() =>
@@ -587,6 +590,7 @@ describe('useQwenStream', () => {
     mockUseReactToolScheduler.mockReturnValue([
       cancelledToolCalls,
       mockScheduleToolCalls,
+      mockCancelAllToolCalls,
       mockMarkToolsAsSubmitted,
     ]);
 
@@ -868,7 +872,7 @@ describe('useQwenStream', () => {
       expect(result.current.streamingState).toBe(StreamingState.Idle);
     });
 
-    it('should not cancel if a tool call is in progress (not just responding)', async () => {
+    it('should cancel executing tools when escape is pressed', async () => {
       const toolCalls: TrackedToolCall[] = [
         {
           request: { callId: 'call1', name: 'tool1', args: {} },
@@ -893,8 +897,9 @@ describe('useQwenStream', () => {
       // Try to cancel
       simulateEscapeKeyPress();
 
-      // Nothing should happen because the state is not `Responding`
-      expect(abortSpy).not.toHaveBeenCalled();
+      expect(abortSpy).toHaveBeenCalled();
+      expect(mockCancelAllToolCalls).toHaveBeenCalled();
+      expect(result.current.streamingState).toBe(StreamingState.Idle);
     });
   });
 
@@ -933,6 +938,7 @@ describe('useQwenStream', () => {
       mockUseReactToolScheduler.mockReturnValue([
         [],
         mockScheduleToolCalls,
+        mockCancelAllToolCalls,
         mockMarkToolsAsSubmitted,
       ]);
 
@@ -962,6 +968,7 @@ describe('useQwenStream', () => {
       mockUseReactToolScheduler.mockReturnValue([
         [completedToolCall],
         mockScheduleToolCalls,
+        mockCancelAllToolCalls,
         mockMarkToolsAsSubmitted,
       ]);
 
@@ -1010,6 +1017,7 @@ describe('useQwenStream', () => {
       mockUseReactToolScheduler.mockReturnValue([
         [completedToolCall],
         mockScheduleToolCalls,
+        mockCancelAllToolCalls,
         mockMarkToolsAsSubmitted,
       ]);
 

@@ -109,7 +109,7 @@ export const useQwenStream = (
     return new GitService(config.getProjectRoot());
   }, [config]);
 
-  const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
+  const [toolCalls, scheduleToolCalls, cancelAllToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
       (completedToolCallsFromScheduler) => {
         // This onComplete is called when ALL scheduled tools for a given batch are done.
@@ -179,6 +179,15 @@ export const useQwenStream = (
       }
       turnCancelledRef.current = true;
       abortControllerRef.current?.abort();
+      if (
+        toolCalls.some((tc) =>
+          ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(
+            tc.status,
+          ),
+        )
+      ) {
+        cancelAllToolCalls();
+      }
       if (pendingHistoryItemRef.current) {
         addItem(pendingHistoryItemRef.current, Date.now());
       }

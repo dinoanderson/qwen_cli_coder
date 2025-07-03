@@ -640,6 +640,66 @@ export class CoreToolScheduler {
     }
   }
 
+  cancelAllToolCalls(): void {
+    const activeStatuses: Status[] = [
+      'scheduled',
+      'executing',
+      'validating',
+      'awaiting_approval',
+    ];
+
+    let anyCancelled = false;
+
+    this.toolCalls = this.toolCalls.map((call) => {
+      if (activeStatuses.includes(call.status)) {
+        anyCancelled = true;
+        const startTime = (call as
+          | ScheduledToolCall
+          | ExecutingToolCall
+          | ValidatingToolCall
+          | WaitingToolCall).startTime;
+        const tool = (call as
+          | ScheduledToolCall
+          | ExecutingToolCall
+          | ValidatingToolCall
+          | WaitingToolCall).tool;
+        const outcome = (call as
+          | ScheduledToolCall
+          | ExecutingToolCall
+          | ValidatingToolCall
+          | WaitingToolCall).outcome;
+        const durationMs = startTime ? Date.now() - startTime : undefined;
+        return {
+          request: call.request,
+          tool,
+          status: 'cancelled',
+          response: {
+            callId: call.request.callId,
+            responseParts: {
+              functionResponse: {
+                id: call.request.callId,
+                name: call.request.name,
+                response: {
+                  error: '[Operation Cancelled] Reason: User cancelled tool execution.',
+                },
+              },
+            },
+            resultDisplay: undefined,
+            error: undefined,
+          },
+          durationMs,
+          outcome,
+        } as CancelledToolCall;
+      }
+      return call;
+    });
+
+    if (anyCancelled) {
+      this.notifyToolCallsUpdate();
+      this.checkAndNotifyCompletion();
+    }
+  }
+
   private checkAndNotifyCompletion(): void {
     const allCallsAreTerminal = this.toolCalls.every(
       (call) =>
