@@ -108,6 +108,13 @@ export const useQwenStream = (
     }
     return new GitService(config.getProjectRoot());
   }, [config]);
+  
+  // Store information about interrupted responses for "continue" functionality
+  const interruptedContextRef = useRef<{
+    originalPrompt?: string;
+    partialResponse?: string;
+    timestamp?: number;
+  }>({});
 
   const [toolCalls, scheduleToolCalls, cancelAllToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
@@ -205,6 +212,16 @@ export const useQwenStream = (
         // Cancel all active tool calls
         if (hasActiveTools) {
           cancelAllToolCalls();
+          
+          // Ensure all tools are marked as submitted immediately
+          // This is critical for returning to idle state
+          const activeToolIds = toolCalls
+            .filter(tc => ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(tc.status))
+            .map(tc => tc.request.callId);
+          
+          if (activeToolIds.length > 0) {
+            markToolsAsSubmitted(activeToolIds);
+          }
         }
         
         // Add any pending history item before cancelling
@@ -216,6 +233,22 @@ export const useQwenStream = (
               pendingHistoryItemRef.current.type === 'gemini_content') {
             const partialResponse = pendingHistoryItemRef.current.text;
             if (partialResponse && partialResponse.trim().length > 0) {
+              // Store the interrupted context for potential "continue" command
+              // Find the last user message to get the original prompt
+              let originalPrompt = '';
+              for (let i = history.length - 1; i >= 0; i--) {
+                if (history[i].type === MessageType.USER) {
+                  originalPrompt = history[i].text || '';
+                  break;
+                }
+              }
+              
+              interruptedContextRef.current = {
+                originalPrompt,
+                partialResponse,
+                timestamp: Date.now(),
+              };
+              
               // Add a note that this was interrupted
               addItem(
                 {
@@ -294,54 +327,84 @@ export const useQwenStream = (
         onDebugMessage(`User query: '${trimmedQuery}'`);
         await logger?.logMessage(MessageSenderType.USER, trimmedQuery);
 
-        // Handle UI-only commands first
-        const slashCommandResult = await handleSlashCommand(trimmedQuery);
-        if (typeof slashCommandResult === 'boolean' && slashCommandResult) {
-          // Command was handled, and it doesn't require a tool call from here
-          return { queryToSend: null, shouldProceed: false };
-        } else if (
-          typeof slashCommandResult === 'object' &&
-          slashCommandResult.shouldScheduleTool
-        ) {
-          // Slash command wants to schedule a tool call (e.g., /memory add)
-          const { toolName, toolArgs } = slashCommandResult;
-          if (toolName && toolArgs) {
-            const toolCallRequest: ToolCallRequestInfo = {
-              callId: `${toolName}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-              name: toolName,
-              args: toolArgs,
-              isClientInitiated: true,
-            };
-            scheduleToolCalls([toolCallRequest], abortSignal);
-          }
-          return { queryToSend: null, shouldProceed: false }; // Handled by scheduling the tool
-        }
-
-        if (shellModeActive && handleShellCommand(trimmedQuery, abortSignal)) {
-          return { queryToSend: null, shouldProceed: false };
-        }
-
-        // Handle @-commands (which might involve tool calls)
-        if (isAtCommand(trimmedQuery)) {
-          const atCommandResult = await handleAtCommand({
-            query: trimmedQuery,
-            config,
-            addItem,
-            onDebugMessage,
-            messageId: userMessageTimestamp,
-            signal: abortSignal,
-          });
-          if (!atCommandResult.shouldProceed) {
-            return { queryToSend: null, shouldProceed: false };
-          }
-          localQueryToSendToGemini = atCommandResult.processedQuery;
-        } else {
-          // Normal query for Gemini
+        // Check for "continue" command after an interruption
+        const isContinueCommand = /^(continue|go on|keep going|resume|proceed)$/i.test(trimmedQuery.toLowerCase());
+        const hasInterruptedContext = interruptedContextRef.current.partialResponse && 
+          interruptedContextRef.current.timestamp && 
+          (Date.now() - interruptedContextRef.current.timestamp < 300000); // 5 minute timeout
+        
+        if (isContinueCommand && hasInterruptedContext) {
+          // Handle continue command
+          const { originalPrompt, partialResponse } = interruptedContextRef.current;
+          
+          // Add the user's continue message to history
           addItem(
             { type: MessageType.USER, text: trimmedQuery },
             userMessageTimestamp,
           );
-          localQueryToSendToGemini = trimmedQuery;
+          
+          // Create a special prompt that includes the context
+          const continuePrompt = `The user asked: "${originalPrompt}"
+
+You started responding with:
+"${partialResponse}"
+
+The response was interrupted. Please continue from where you left off, picking up the exact thought or sentence that was cut off.`;
+          
+          // Clear the interrupted context after using it
+          interruptedContextRef.current = {};
+          
+          localQueryToSendToGemini = continuePrompt;
+        } else {
+          // Handle UI-only commands first
+          const slashCommandResult = await handleSlashCommand(trimmedQuery);
+          if (typeof slashCommandResult === 'boolean' && slashCommandResult) {
+            // Command was handled, and it doesn't require a tool call from here
+            return { queryToSend: null, shouldProceed: false };
+          } else if (
+            typeof slashCommandResult === 'object' &&
+            slashCommandResult.shouldScheduleTool
+          ) {
+            // Slash command wants to schedule a tool call (e.g., /memory add)
+            const { toolName, toolArgs } = slashCommandResult;
+            if (toolName && toolArgs) {
+              const toolCallRequest: ToolCallRequestInfo = {
+                callId: `${toolName}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                name: toolName,
+                args: toolArgs,
+                isClientInitiated: true,
+              };
+              scheduleToolCalls([toolCallRequest], abortSignal);
+            }
+            return { queryToSend: null, shouldProceed: false }; // Handled by scheduling the tool
+          }
+
+          if (shellModeActive && handleShellCommand(trimmedQuery, abortSignal)) {
+            return { queryToSend: null, shouldProceed: false };
+          }
+
+          // Handle @-commands (which might involve tool calls)
+          if (isAtCommand(trimmedQuery)) {
+            const atCommandResult = await handleAtCommand({
+              query: trimmedQuery,
+              config,
+              addItem,
+              onDebugMessage,
+              messageId: userMessageTimestamp,
+              signal: abortSignal,
+            });
+            if (!atCommandResult.shouldProceed) {
+              return { queryToSend: null, shouldProceed: false };
+            }
+            localQueryToSendToGemini = atCommandResult.processedQuery;
+          } else {
+            // Normal query for Gemini
+            addItem(
+              { type: MessageType.USER, text: trimmedQuery },
+              userMessageTimestamp,
+            );
+            localQueryToSendToGemini = trimmedQuery;
+          }
         }
       } else {
         // It's a function response (PartListUnion that isn't a string)
@@ -648,6 +711,11 @@ export const useQwenStream = (
         }
       } finally {
         setIsResponding(false);
+        
+        // Ensure we're not stuck in a cancelled state
+        if (turnCancelledRef.current) {
+          turnCancelledRef.current = false;
+        }
       }
     },
     [
@@ -749,23 +817,16 @@ export const useQwenStream = (
       );
 
       if (allToolsCancelled) {
-        // IMPORTANT: Mark ALL completed tools as submitted BEFORE adding to history
+        // IMPORTANT: Mark ALL completed tools as submitted BEFORE sending responses
         // This includes cancelled tools to ensure the streaming state returns to idle
         const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
           (toolCall) => toolCall.request.callId,
         );
         markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
         
-        // Prepare cancelled tool responses to send to the AI
-        const responsesToSend: PartListUnion[] = geminiTools.map(
-          (toolCall) => toolCall.response.responseParts,
-        );
-        
-        // Submit the cancelled tool responses so the AI can acknowledge the cancellation
-        // This ensures the conversation doesn't get stuck and the AI can provide appropriate feedback
-        submitQuery(mergePartListUnions(responsesToSend), {
-          isContinuation: true,
-        });
+        // Don't send cancelled tool responses back to the AI
+        // This prevents the system from getting stuck waiting for a response
+        // The cancellation message has already been added to the history
         
         // Ensure we're in a clean state after all tools are cancelled
         // Reset the cancelled flag to allow new inputs
