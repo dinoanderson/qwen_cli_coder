@@ -5,7 +5,7 @@
  */
 
 import { WebSocket } from 'ws';
-import { Config, QwenEventType, ServerQwenStreamEvent, Turn } from '@qwen/qwen-cli-core';
+import { Config, QwenEventType, ServerQwenStreamEvent, Turn, executeToolCall, ToolCallRequestInfo, ToolCallResponseInfo } from '@qwen/qwen-cli-core';
 import { LoadedSettings } from '../config/settings.js';
 import { SessionManager, SessionFile } from './sessionManager.js';
 
@@ -172,9 +172,26 @@ export class WebSocketHandler {
       // Create abort controller for cancellation support
       const abortController = new AbortController();
       
+      // Keep track of pending tool calls that need execution
+      const pendingToolCalls: ToolCallRequestInfo[] = [];
+      
       // Process the turn and stream responses
       for await (const event of turn.run(parts, abortController.signal)) {
+        // Handle tool call requests by collecting them for execution
+        if (event.type === QwenEventType.ToolCallRequest) {
+          pendingToolCalls.push(event.value);
+        }
+        
         await this.handleQwenEvent(ws, event);
+      }
+      
+      // Execute any pending tool calls
+      if (pendingToolCalls.length > 0) {
+        // TODO: Implement tool execution for WebSocket handler
+        // const toolResults = await this.executeToolCalls(pendingToolCalls, abortController.signal);
+        
+        // For now, just log that we have pending tool calls
+        console.log('[WebSocket] Pending tool calls:', pendingToolCalls.length);
       }
 
       // Send completion message
