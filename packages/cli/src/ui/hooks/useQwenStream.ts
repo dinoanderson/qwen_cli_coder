@@ -178,12 +178,14 @@ export const useQwenStream = (
 
   useInput((_input, key) => {
     if (key.escape) {
+      
       // Check if we have active tools regardless of streaming state
       const hasActiveTools = toolCalls.some((tc) =>
         ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(
           tc.status,
         ),
       );
+      
       
       // Allow cancellation if either responding OR tools are active
       if (streamingState === StreamingState.Responding || 
@@ -195,7 +197,10 @@ export const useQwenStream = (
         }
         
         turnCancelledRef.current = true;
-        abortControllerRef.current?.abort();
+        
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
         
         // Cancel all active tool calls
         if (hasActiveTools) {
@@ -251,6 +256,7 @@ export const useQwenStream = (
         setPendingHistoryItem(null);
         setIsResponding(false);
         
+        
         // Reset the cancel flag after all operations are complete
         // This ensures the system can accept new inputs after cancellation
         setTimeout(() => {
@@ -269,6 +275,7 @@ export const useQwenStream = (
       queryToSend: PartListUnion | null;
       shouldProceed: boolean;
     }> => {
+      
       // Reset cancel flag for new requests to allow subsequent interactions after ESC
       turnCancelledRef.current = false;
       
@@ -575,12 +582,14 @@ export const useQwenStream = (
 
   const submitQuery = useCallback(
     async (query: PartListUnion, options?: { isContinuation: boolean }) => {
+      
       if (
         (streamingState === StreamingState.Responding ||
           streamingState === StreamingState.WaitingForConfirmation) &&
         !options?.isContinuation
-      )
+      ) {
         return;
+      }
 
       const userMessageTimestamp = Date.now();
       setShowHelp(false);
@@ -593,6 +602,7 @@ export const useQwenStream = (
         userMessageTimestamp,
         abortSignal,
       );
+
 
       if (!shouldProceed || queryToSend === null) {
         return;
@@ -746,34 +756,16 @@ export const useQwenStream = (
         );
         markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
         
-        if (qwenClient) {
-          // First, add a context message to help the AI understand what happened
-          qwenClient.addHistory({
-            role: 'user',
-            parts: [{
-              text: '[System: The previous tool operations were cancelled by the user. The AI should acknowledge this and ask how to proceed or wait for further instructions.]'
-            }],
-          });
-          
-          // Then add the function responses so the model knows the tools were cancelled
-          const responsesToAdd = geminiTools.flatMap(
-            (toolCall) => toolCall.response.responseParts,
-          );
-          for (const response of responsesToAdd) {
-            let parts: Part[];
-            if (Array.isArray(response)) {
-              parts = response;
-            } else if (typeof response === 'string') {
-              parts = [{ text: response }];
-            } else {
-              parts = [response];
-            }
-            qwenClient.addHistory({
-              role: 'user',
-              parts,
-            });
-          }
-        }
+        // Prepare cancelled tool responses to send to the AI
+        const responsesToSend: PartListUnion[] = geminiTools.map(
+          (toolCall) => toolCall.response.responseParts,
+        );
+        
+        // Submit the cancelled tool responses so the AI can acknowledge the cancellation
+        // This ensures the conversation doesn't get stuck and the AI can provide appropriate feedback
+        submitQuery(mergePartListUnions(responsesToSend), {
+          isContinuation: true,
+        });
         
         // Ensure we're in a clean state after all tools are cancelled
         // Reset the cancelled flag to allow new inputs
@@ -781,9 +773,6 @@ export const useQwenStream = (
           turnCancelledRef.current = false;
         }
         
-        // IMPORTANT: Even though we're not submitting to Gemini, we need to
-        // trigger the completion handler so the scheduler can clear its toolCalls array
-        // This prevents the system from getting stuck with cancelled tools
         return;
       }
 
