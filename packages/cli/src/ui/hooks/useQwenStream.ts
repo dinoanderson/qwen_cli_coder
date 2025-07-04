@@ -817,24 +817,15 @@ The response was interrupted. Please continue from where you left off, picking u
       );
 
       if (allToolsCancelled) {
-        // IMPORTANT: Mark ALL completed tools as submitted BEFORE sending responses
-        // This includes cancelled tools to ensure the streaming state returns to idle
+        // When all tools are cancelled, we still need to send the responses back to the AI
+        // This is crucial for maintaining proper conversation flow
         const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
           (toolCall) => toolCall.request.callId,
         );
         markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
         
-        // Don't send cancelled tool responses back to the AI
-        // This prevents the system from getting stuck waiting for a response
-        // The cancellation message has already been added to the history
-        
-        // Ensure we're in a clean state after all tools are cancelled
-        // Reset the cancelled flag to allow new inputs
-        if (turnCancelledRef.current) {
-          turnCancelledRef.current = false;
-        }
-        
-        return;
+        // Continue with sending the cancelled tool responses to the AI
+        // The AI needs these responses to understand the tools were cancelled
       }
 
       const responsesToSend: PartListUnion[] = geminiTools.map(

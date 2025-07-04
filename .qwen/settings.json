@@ -1,6 +1,6 @@
 {
   "theme": "Default",
-  "language": "en",
+  "language": "zh",
   "usageStatisticsEnabled": true,
   "autoConfigureMaxOldSpaceSize": true,
   "fileFiltering": {
@@ -8,10 +8,7 @@
     "enableRecursiveFileSearch": true
   },
   "telemetry": {
-    "logPrompts": true,
-    "enabled": true,
-    "otlpEndpoint": "http://localhost:4317",
-    "target": "local"
+    "logPrompts": true
   },
   "mcpServers": {
     "duckduckgo": {

@@ -30,6 +30,7 @@ import {
   toQwenEmbedRequest,
   fromQwenEmbedResponse,
 } from './qwenMappers.js';
+import { qwenApiLogger } from './qwenLogger.js';
 
 export class QwenContentGenerator implements ContentGenerator {
   private readonly apiKey: string;
@@ -79,8 +80,11 @@ export class QwenContentGenerator implements ContentGenerator {
       },
     };
 
+    // Log the request
+    const endpoint = `${this.baseUrl}/services/aigc/text-generation/generation`;
+    qwenApiLogger.logRequest(endpoint, 'POST', requestBody);
 
-    const response = await fetch(`${this.baseUrl}/services/aigc/text-generation/generation`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify(requestBody),
@@ -90,10 +94,14 @@ export class QwenContentGenerator implements ContentGenerator {
 
     if (!response.ok) {
       const error = await response.text();
+      qwenApiLogger.logError(endpoint, 'POST', new Error(`Qwen API error: ${response.status} - ${error}`));
       throw new Error(`Qwen API error: ${response.status} - ${error}`);
     }
 
     const data = await response.json();
+    
+    // Log the response
+    qwenApiLogger.logResponse(endpoint, 'POST', data, data.request_id);
     
     // Transform DashScope response to match OpenAI format
     const qwenResponse: QwenGenerateResponse = {
@@ -161,8 +169,11 @@ export class QwenContentGenerator implements ContentGenerator {
       },
     };
 
+    // Log the streaming request
+    const streamEndpoint = `${this.baseUrl}/services/aigc/text-generation/generation`;
+    qwenApiLogger.logRequest(streamEndpoint, 'POST (Stream)', streamRequestBody);
 
-    const response = await fetch(`${this.baseUrl}/services/aigc/text-generation/generation`, {
+    const response = await fetch(streamEndpoint, {
       method: 'POST',
       headers: {
         ...this.headers,
@@ -174,6 +185,7 @@ export class QwenContentGenerator implements ContentGenerator {
 
     if (!response.ok) {
       const error = await response.text();
+      qwenApiLogger.logError(streamEndpoint, 'POST (Stream)', new Error(`Qwen API error: ${response.status} - ${error}`));
       throw new Error(`Qwen API error: ${response.status} - ${error}`);
     }
 
@@ -184,6 +196,7 @@ export class QwenContentGenerator implements ContentGenerator {
 
     const decoder = new TextDecoder();
     let buffer = '';
+    let streamResponseCount = 0;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -205,6 +218,12 @@ export class QwenContentGenerator implements ContentGenerator {
 
           try {
             const parsed = JSON.parse(data);
+            
+            // Log first few streaming responses for debugging
+            if (streamResponseCount < 3 && qwenApiLogger.isEnabled()) {
+              qwenApiLogger.logResponse(streamEndpoint, 'POST (Stream Chunk)', parsed, parsed.request_id);
+              streamResponseCount++;
+            }
             
             // Handle DashScope response structure
             if (parsed.output) {
