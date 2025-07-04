@@ -122,13 +122,16 @@ export function toQwenGenerateRequest(
     request.max_tokens = params.config.maxOutputTokens;
   }
   
-  // Convert tools to functions
+  // Convert tools to Qwen format
   if (params.config?.tools && params.config.tools.length > 0) {
-    request.functions = params.config.tools.flatMap((tool: any) => 
+    request.tools = params.config.tools.flatMap((tool: any) => 
       tool.functionDeclarations?.map((func: any) => ({
-        name: func.name,
-        description: func.description || '',
-        parameters: func.parameters || {},
+        type: 'function',
+        function: {
+          name: func.name,
+          description: func.description || '',
+          parameters: func.parameters || {},
+        }
       })) || []
     );
   }

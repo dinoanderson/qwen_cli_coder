@@ -21,7 +21,8 @@ export interface QwenGenerateRequest {
   top_p?: number;
   max_tokens?: number;
   stream?: boolean;
-  functions?: QwenFunction[];
+  functions?: QwenFunction[]; // Legacy format
+  tools?: QwenTool[]; // New format
   extra_body?: {
     enable_thinking?: boolean;
   };
@@ -31,6 +32,15 @@ export interface QwenFunction {
   name: string;
   description: string;
   parameters: Record<string, any>;
+}
+
+export interface QwenTool {
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, any>;
+  };
 }
 
 // Qwen API Response Types

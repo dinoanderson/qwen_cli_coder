@@ -66,7 +66,11 @@ export class QwenContentGenerator implements ContentGenerator {
         ...qwenRequest.extra_body,
         // Add result_format when thinking is enabled
         ...(this.enableThinking && { result_format: 'message' }),
-        ...(qwenRequest.functions && qwenRequest.functions.length > 0 && {
+        // Use tools if available (new format), fallback to functions (legacy)
+        ...(qwenRequest.tools && qwenRequest.tools.length > 0 && {
+          tools: qwenRequest.tools,
+        }),
+        ...(qwenRequest.functions && qwenRequest.functions.length > 0 && !qwenRequest.tools && {
           functions: qwenRequest.functions,
         }),
       },
@@ -144,7 +148,11 @@ export class QwenContentGenerator implements ContentGenerator {
         ...qwenRequest.extra_body,
         // Add result_format when thinking is enabled
         ...(this.enableThinking && { result_format: 'message' }),
-        ...(qwenRequest.functions && qwenRequest.functions.length > 0 && {
+        // Use tools if available (new format), fallback to functions (legacy)
+        ...(qwenRequest.tools && qwenRequest.tools.length > 0 && {
+          tools: qwenRequest.tools,
+        }),
+        ...(qwenRequest.functions && qwenRequest.functions.length > 0 && !qwenRequest.tools && {
           functions: qwenRequest.functions,
         }),
       },
@@ -202,24 +210,27 @@ export class QwenContentGenerator implements ContentGenerator {
             if (parsed.output) {
               // Check for choices format (function calls) FIRST
               const choice = parsed.output.choices?.[0];
-              if (choice?.message?.function_call) {
+              // Qwen uses tool_calls array, not function_call
+              if (choice?.message?.tool_calls && choice.message.tool_calls.length > 0) {
+                const toolCall = choice.message.tool_calls[0]; // Process first tool call
+                
                 // Accumulate function call data across chunks
                 if (!accumulatedFunctionCall) {
                   accumulatedFunctionCall = { name: '', arguments: '' };
                 }
                 
                 // Only update name if it's not empty (DashScope sends empty name after first chunk)
-                if (choice.message.function_call.name && choice.message.function_call.name.trim() !== '') {
-                  accumulatedFunctionCall.name = choice.message.function_call.name;
+                if (toolCall.function?.name && toolCall.function.name.trim() !== '') {
+                  accumulatedFunctionCall.name = toolCall.function.name;
                 }
                 
                 // Always accumulate arguments if present
-                if (choice.message.function_call.arguments) {
-                  accumulatedFunctionCall.arguments = (accumulatedFunctionCall.arguments || '') + choice.message.function_call.arguments;
+                if (toolCall.function?.arguments) {
+                  accumulatedFunctionCall.arguments = (accumulatedFunctionCall.arguments || '') + toolCall.function.arguments;
                 }
                 
-                // Only yield when we have a complete function call (finish_reason = function_call)
-                if (choice.finish_reason === 'function_call') {
+                // Only yield when we have a complete function call (finish_reason = tool_calls)
+                if (choice.finish_reason === 'tool_calls') {
                   
                   const streamResponse: QwenStreamResponse = {
                     id: parsed.request_id || 'qwen-stream-' + Date.now(),
