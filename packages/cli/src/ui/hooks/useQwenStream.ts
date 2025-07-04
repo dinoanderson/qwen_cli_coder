@@ -109,12 +109,7 @@ export const useQwenStream = (
     return new GitService(config.getProjectRoot());
   }, [config]);
   
-  // Store information about interrupted responses for "continue" functionality
-  const interruptedContextRef = useRef<{
-    originalPrompt?: string;
-    partialResponse?: string;
-    timestamp?: number;
-  }>({});
+  // Remove the interrupted context - not part of original Gemini design
 
   const [toolCalls, scheduleToolCalls, cancelAllToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
@@ -233,30 +228,7 @@ export const useQwenStream = (
               pendingHistoryItemRef.current.type === 'gemini_content') {
             const partialResponse = pendingHistoryItemRef.current.text;
             if (partialResponse && partialResponse.trim().length > 0) {
-              // Store the interrupted context for potential "continue" command
-              // Find the last user message to get the original prompt
-              let originalPrompt = '';
-              for (let i = history.length - 1; i >= 0; i--) {
-                if (history[i].type === MessageType.USER) {
-                  originalPrompt = history[i].text || '';
-                  break;
-                }
-              }
-              
-              interruptedContextRef.current = {
-                originalPrompt,
-                partialResponse,
-                timestamp: Date.now(),
-              };
-              
-              // Add a note that this was interrupted
-              addItem(
-                {
-                  type: MessageType.INFO,
-                  text: '↑ Response was interrupted. You can say "continue" to resume or provide new instructions.',
-                },
-                Date.now(),
-              );
+              // Don't add special continue handling - just let the system work normally
             }
           }
         }
@@ -274,8 +246,10 @@ export const useQwenStream = (
             },
             Date.now(),
           );
-        } else {
-          // Add generic cancellation message
+        } else if (!pendingHistoryItemRef.current || 
+                   (pendingHistoryItemRef.current.type !== 'gemini' && 
+                    pendingHistoryItemRef.current.type !== 'gemini_content')) {
+          // Only add generic cancellation message if there was no partial AI response
           addItem(
             {
               type: MessageType.INFO,
@@ -327,35 +301,8 @@ export const useQwenStream = (
         onDebugMessage(`User query: '${trimmedQuery}'`);
         await logger?.logMessage(MessageSenderType.USER, trimmedQuery);
 
-        // Check for "continue" command after an interruption
-        const isContinueCommand = /^(continue|go on|keep going|resume|proceed)$/i.test(trimmedQuery.toLowerCase());
-        const hasInterruptedContext = interruptedContextRef.current.partialResponse && 
-          interruptedContextRef.current.timestamp && 
-          (Date.now() - interruptedContextRef.current.timestamp < 300000); // 5 minute timeout
-        
-        if (isContinueCommand && hasInterruptedContext) {
-          // Handle continue command
-          const { originalPrompt, partialResponse } = interruptedContextRef.current;
-          
-          // Add the user's continue message to history
-          addItem(
-            { type: MessageType.USER, text: trimmedQuery },
-            userMessageTimestamp,
-          );
-          
-          // Create a special prompt that includes the context
-          const continuePrompt = `The user asked: "${originalPrompt}"
-
-You started responding with:
-"${partialResponse}"
-
-The response was interrupted. Please continue from where you left off, picking up the exact thought or sentence that was cut off.`;
-          
-          // Clear the interrupted context after using it
-          interruptedContextRef.current = {};
-          
-          localQueryToSendToGemini = continuePrompt;
-        } else {
+        // Remove continue command handling - not part of original design
+        {
           // Handle UI-only commands first
           const slashCommandResult = await handleSlashCommand(trimmedQuery);
           if (typeof slashCommandResult === 'boolean' && slashCommandResult) {
