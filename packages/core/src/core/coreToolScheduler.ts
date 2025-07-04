@@ -673,7 +673,7 @@ export class CoreToolScheduler {
                 id: call.request.callId,
                 name: call.request.name,
                 response: {
-                  error: '[Operation Cancelled] Reason: User cancelled tool execution.',
+                  error: `[Operation Cancelled] Tool '${call.request.name}' was interrupted by user. The operation did not complete.`,
                 },
               },
             },
@@ -692,7 +692,8 @@ export class CoreToolScheduler {
     if (anyCancelled) {
       // Notify listeners that tool calls have been updated
       this.notifyToolCallsUpdate();
-      // Check if all calls are now complete
+      // IMPORTANT: Always check and notify completion after cancellation
+      // This ensures the scheduler clears its internal state properly
       this.checkAndNotifyCompletion();
     }
   }

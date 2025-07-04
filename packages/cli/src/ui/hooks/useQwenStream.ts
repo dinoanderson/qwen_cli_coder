@@ -205,16 +205,47 @@ export const useQwenStream = (
         // Add any pending history item before cancelling
         if (pendingHistoryItemRef.current) {
           addItem(pendingHistoryItemRef.current, Date.now());
+          
+          // If the AI had started responding, add context about what was interrupted
+          if (pendingHistoryItemRef.current.type === 'gemini' || 
+              pendingHistoryItemRef.current.type === 'gemini_content') {
+            const partialResponse = pendingHistoryItemRef.current.text;
+            if (partialResponse && partialResponse.trim().length > 0) {
+              // Add a note that this was interrupted
+              addItem(
+                {
+                  type: MessageType.INFO,
+                  text: '↑ Response was interrupted. You can say "continue" to resume or provide new instructions.',
+                },
+                Date.now(),
+              );
+            }
+          }
         }
         
-        // Add cancellation message
-        addItem(
-          {
-            type: MessageType.INFO,
-            text: 'Request cancelled.',
-          },
-          Date.now(),
-        );
+        // Add context about cancelled tools if any
+        if (hasActiveTools) {
+          const cancelledToolNames = toolCalls
+            .filter(tc => ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(tc.status))
+            .map(tc => tc.request.name);
+          
+          addItem(
+            {
+              type: MessageType.INFO,
+              text: `Request cancelled. Tools interrupted: ${cancelledToolNames.join(', ')}`,
+            },
+            Date.now(),
+          );
+        } else {
+          // Add generic cancellation message
+          addItem(
+            {
+              type: MessageType.INFO,
+              text: 'Request cancelled.',
+            },
+            Date.now(),
+          );
+        }
         
         // Reset all state to ensure clean cancellation
         setPendingHistoryItem(null);
@@ -708,9 +739,23 @@ export const useQwenStream = (
       );
 
       if (allToolsCancelled) {
+        // IMPORTANT: Mark ALL completed tools as submitted BEFORE adding to history
+        // This includes cancelled tools to ensure the streaming state returns to idle
+        const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
+          (toolCall) => toolCall.request.callId,
+        );
+        markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
+        
         if (qwenClient) {
-          // We need to manually add the function responses to the history
-          // so the model knows the tools were cancelled.
+          // First, add a context message to help the AI understand what happened
+          qwenClient.addHistory({
+            role: 'user',
+            parts: [{
+              text: '[System: The previous tool operations were cancelled by the user. The AI should acknowledge this and ask how to proceed or wait for further instructions.]'
+            }],
+          });
+          
+          // Then add the function responses so the model knows the tools were cancelled
           const responsesToAdd = geminiTools.flatMap(
             (toolCall) => toolCall.response.responseParts,
           );
@@ -729,13 +774,6 @@ export const useQwenStream = (
             });
           }
         }
-
-        // IMPORTANT: Mark ALL completed tools as submitted, not just Gemini tools
-        // This includes cancelled tools to ensure the streaming state returns to idle
-        const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
-          (toolCall) => toolCall.request.callId,
-        );
-        markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
         
         // Ensure we're in a clean state after all tools are cancelled
         // Reset the cancelled flag to allow new inputs

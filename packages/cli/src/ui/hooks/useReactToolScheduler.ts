@@ -107,6 +107,8 @@ export function useReactToolScheduler(
 
   const allToolCallsCompleteHandler: AllToolCallsCompleteHandler = useCallback(
     (completedToolCalls) => {
+      // Always call onComplete, even for cancelled tools
+      // This ensures the scheduler's internal state is properly cleared
       onComplete(completedToolCalls);
     },
     [onComplete],
@@ -114,8 +116,8 @@ export function useReactToolScheduler(
 
   const toolCallsUpdateHandler: ToolCallsUpdateHandler = useCallback(
     (updatedCoreToolCalls: ToolCall[]) => {
-      setToolCallsForDisplay((prevTrackedCalls) =>
-        updatedCoreToolCalls.map((coreTc) => {
+      setToolCallsForDisplay((prevTrackedCalls) => {
+        const newTrackedCalls = updatedCoreToolCalls.map((coreTc) => {
           const existingTrackedCall = prevTrackedCalls.find(
             (ptc) => ptc.request.callId === coreTc.request.callId,
           );
@@ -125,8 +127,10 @@ export function useReactToolScheduler(
               existingTrackedCall?.responseSubmittedToGemini ?? false,
           } as TrackedToolCall;
           return newTrackedCall;
-        }),
-      );
+        });
+        
+        return newTrackedCalls;
+      });
     },
     [],
   );
