@@ -460,7 +460,22 @@ export class QwenChat {
     } catch (error) {
       errorOccurred = true;
       const durationMs = Date.now() - startTime;
-      this._logApiError(durationMs, error);
+      
+      // Check if this is an abort error (user pressed ESC)
+      const isAbortError = error instanceof Error && 
+        (error.name === 'AbortError' || error.message?.includes('abort'));
+      
+      // Only log non-abort errors
+      if (!isAbortError) {
+        this._logApiError(durationMs, error);
+      }
+      
+      // Record partial history even when interrupted (e.g., ESC key pressed)
+      // This is crucial for the AI to understand context when user says "continue"
+      if (outputContent.length > 0) {
+        this.recordHistory(inputContent, outputContent);
+      }
+      
       throw error;
     }
 
@@ -478,8 +493,8 @@ export class QwenChat {
         this.getFinalUsageMetadata(chunks),
         fullText,
       );
+      this.recordHistory(inputContent, outputContent);
     }
-    this.recordHistory(inputContent, outputContent);
   }
 
   private recordHistory(
