@@ -146,6 +146,9 @@ export const useQwenStream = (
     await done;
     setIsResponding(false);
   }, []);
+  // Use a ref to break circular dependency with submitQuery
+  const submitQueryRef = useRef<(query: PartListUnion) => void>(() => {});
+  
   const { handleShellCommand } = useShellCommandProcessor(
     addItem,
     setPendingHistoryItem,
@@ -153,6 +156,7 @@ export const useQwenStream = (
     onDebugMessage,
     config,
     qwenClient,
+    (query) => submitQueryRef.current(query),
   );
 
   const streamingState = useMemo(() => {
@@ -208,15 +212,8 @@ export const useQwenStream = (
         if (hasActiveTools) {
           cancelAllToolCalls();
           
-          // Ensure all tools are marked as submitted immediately
-          // This is critical for returning to idle state
-          const activeToolIds = toolCalls
-            .filter(tc => ['executing', 'scheduled', 'validating', 'awaiting_approval'].includes(tc.status))
-            .map(tc => tc.request.callId);
-          
-          if (activeToolIds.length > 0) {
-            markToolsAsSubmitted(activeToolIds);
-          }
+          // Don't mark tools as submitted here - let the normal flow handle it
+          // This ensures cancelled tool responses are sent back to the AI
         }
         
         // Add any pending history item before cancelling
@@ -681,6 +678,11 @@ export const useQwenStream = (
     ],
   );
 
+  // Update the ref with the actual submitQuery function
+  useEffect(() => {
+    submitQueryRef.current = submitQuery;
+  }, [submitQuery]);
+
   /**
    * Automatically submits responses for completed tool calls.
    * This effect runs when `toolCalls` or `isResponding` changes.
@@ -758,21 +760,16 @@ export const useQwenStream = (
         return;
       }
 
-      // If all the tools were cancelled, don't submit a response to Gemini.
+      // If all the tools were cancelled, we still need to submit responses to Gemini.
+      // The AI needs to know the tools were cancelled to continue the conversation properly.
       const allToolsCancelled = geminiTools.every(
         (tc) => tc.status === 'cancelled',
       );
 
       if (allToolsCancelled) {
-        // When all tools are cancelled, we still need to send the responses back to the AI
-        // This is crucial for maintaining proper conversation flow
-        const allCallIdsToMarkAsSubmitted = completedAndReadyToSubmitTools.map(
-          (toolCall) => toolCall.request.callId,
-        );
-        markToolsAsSubmitted(allCallIdsToMarkAsSubmitted);
-        
-        // Continue with sending the cancelled tool responses to the AI
-        // The AI needs these responses to understand the tools were cancelled
+        // Even though all tools were cancelled, we still need to send the cancelled
+        // responses back to the AI. This is crucial for maintaining proper conversation flow.
+        // The AI will receive the cancellation error messages and can respond appropriately.
       }
 
       const responsesToSend: PartListUnion[] = geminiTools.map(

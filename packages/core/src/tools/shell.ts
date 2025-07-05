@@ -186,7 +186,8 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
           // wrap command to append subprocess pids (via pgrep) to temporary file
           let command = params.command.trim();
           if (!command.endsWith('&')) command += ';';
-          return `{ ${command} }; __code=$?; pgrep -g 0 >${tempFilePath} 2>&1; exit $__code;`;
+          // Use || true to ensure the wrapped command doesn't fail if pgrep is not available
+          return `{ ${command} }; __code=$?; pgrep -g 0 >${tempFilePath} 2>&1 || true; exit $__code;`;
         })();
 
     // spawn command in specified directory (or project root if not specified)
@@ -301,11 +302,19 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     };
     shell.on('exit', exitHandler);
 
+    let isAborting = false;
     const abortHandler = async () => {
+      // Prevent multiple abort handler executions
+      if (isAborting || exited) {
+        return;
+      }
+      isAborting = true;
+      
       if (shell.pid && !exited) {
         // Clear timeout when abort is triggered to prevent double-termination
         if (timeoutId) {
           clearTimeout(timeoutId);
+          timeoutId = null;
         }
         
         if (os.platform() === 'win32') {
@@ -340,13 +349,16 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     const isDevServerCommand = /\b(dev|serve|watch|start|run dev|run serve)\b/i.test(params.command);
     const timeoutMs = isDevServerCommand ? DEV_SERVER_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
     
-    // Only set up abort handler after timeout is created
+    // Set up abort handler before timeout to ensure proper cleanup
     abortSignal.addEventListener('abort', abortHandler);
     
-    timeoutId = setTimeout(() => {
-      timedOut = true;
-      abortHandler();
-    }, timeoutMs);
+    // Only set timeout if not already aborted
+    if (!abortSignal.aborted) {
+      timeoutId = setTimeout(() => {
+        timedOut = true;
+        abortHandler();
+      }, timeoutMs);
+    }
 
     // wait for the shell to exit
     try {
@@ -378,7 +390,9 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
         }
         fs.unlinkSync(tempFilePath);
       } else {
-        if (!abortSignal.aborted) {
+        // Only log as error if the command completed normally but pgrep failed
+        // It's normal for the file to not exist when the command was aborted quickly
+        if (!abortSignal.aborted && !timedOut && code === 0) {
           console.error('missing pgrep output');
         }
       }
