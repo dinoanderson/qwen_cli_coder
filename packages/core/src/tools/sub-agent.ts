@@ -263,7 +263,7 @@ Important considerations:
     
     // Build command arguments
     const args = qwenExecutable === 'qwen' 
-      ? ['-p', prompt] 
+      ? ['qwen', '-p', prompt] 
       : ['node', qwenExecutable, '-p', prompt];
 
     const command = args[0];
