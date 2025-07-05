@@ -137,7 +137,7 @@ export const ModelDialog: React.FC<ModelDialogProps> = ({
       </Text>
       
       <Text color={Colors.Gray} dimColor>
-        💡 Thinking mode requires CLI restart to take effect
+        💡 Thinking mode changes take effect immediately
       </Text>
     </Box>
   );

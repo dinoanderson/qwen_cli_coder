@@ -26,8 +26,8 @@ export function useThinkingCommand(
       setIsThinkingDialogOpen(false);
       
       try {
-        const currentConfig = config?.getContentGeneratorConfig();
-        const currentlyEnabled = currentConfig?.enableThinking || false;
+        const qwenClient = config?.getQwenClient();
+        const currentlyEnabled = qwenClient?.getEnableThinking() || false;
         
         if (enabled === currentlyEnabled) {
           addItem({
@@ -37,18 +37,23 @@ export function useThinkingCommand(
           return;
         }
         
-        // Note: We can't change thinking mode on the fly without recreating the config
-        // For now, we'll update the setting and inform the user they need to restart
-        if (scope === SettingScope.User) {
-          // Set environment variable approach - would need to restart anyway
+        // Dynamically update thinking mode without restart
+        if (qwenClient && qwenClient.setEnableThinking) {
+          qwenClient.setEnableThinking(enabled);
+          
+          // Also update the settings for persistence
+          settings.setValue(scope, 'enableThinking', enabled);
+          
           addItem({
             type: MessageType.INFO,
-            text: `Thinking mode ${enabled ? 'enabled' : 'disabled'}. Please restart Qwen CLI for changes to take effect.`,
+            text: `Thinking mode ${enabled ? 'enabled' : 'disabled'} successfully. Changes take effect immediately.`,
           }, Date.now());
         } else {
+          // Fallback: update settings and request restart
+          settings.setValue(scope, 'enableThinking', enabled);
           addItem({
             type: MessageType.INFO,
-            text: `Thinking mode setting updated. Use QWEN_ENABLE_THINKING=${enabled} environment variable or restart CLI.`,
+            text: `Thinking mode setting updated. Please restart Qwen CLI for changes to take effect.`,
           }, Date.now());
         }
         
@@ -60,12 +65,12 @@ export function useThinkingCommand(
         }, Date.now());
       }
     },
-    [config, addItem, setThinkingError],
+    [config, addItem, setThinkingError, settings],
   );
 
   const getCurrentThinkingState = useCallback(() => {
-    const currentConfig = config?.getContentGeneratorConfig();
-    return currentConfig?.enableThinking || false;
+    const qwenClient = config?.getQwenClient();
+    return qwenClient?.getEnableThinking() || false;
   }, [config]);
 
   return {

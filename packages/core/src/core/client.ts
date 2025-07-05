@@ -558,6 +558,28 @@ export class QwenClient {
   }
 
   /**
+   * Set thinking mode for the content generator.
+   * This allows dynamic updates without recreating the client.
+   */
+  setEnableThinking(enable: boolean): void {
+    const contentGenerator = this.getContentGenerator();
+    if (contentGenerator.setEnableThinking) {
+      contentGenerator.setEnableThinking(enable);
+    }
+  }
+
+  /**
+   * Get the current thinking mode status.
+   */
+  getEnableThinking(): boolean {
+    const contentGenerator = this.getContentGenerator();
+    if (contentGenerator.getEnableThinking) {
+      return contentGenerator.getEnableThinking();
+    }
+    return false;
+  }
+
+  /**
    * Handles fallback to different model when persistent 429 errors occur.
    * Since we're using Qwen, this is not currently implemented.
    */
