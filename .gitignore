@@ -45,3 +45,4 @@ test*.txt
 
 # Internal memory and documentation files
 CLAUDE.md
+test_esc_fix.sh
