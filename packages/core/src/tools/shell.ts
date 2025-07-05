@@ -303,6 +303,11 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
 
     const abortHandler = async () => {
       if (shell.pid && !exited) {
+        // Clear timeout when abort is triggered to prevent double-termination
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
         if (os.platform() === 'win32') {
           // For Windows, use taskkill to kill the process tree
           spawn('taskkill', ['/pid', shell.pid.toString(), '/f', '/t']);
@@ -328,14 +333,17 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
         }
       }
     };
-    abortSignal.addEventListener('abort', abortHandler);
-
+    
     // Set up timeout - use shorter timeout for dev server commands
     let timedOut = false;
+    let timeoutId: NodeJS.Timeout | null = null;
     const isDevServerCommand = /\b(dev|serve|watch|start|run dev|run serve)\b/i.test(params.command);
     const timeoutMs = isDevServerCommand ? DEV_SERVER_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
     
-    const timeoutId = setTimeout(() => {
+    // Only set up abort handler after timeout is created
+    abortSignal.addEventListener('abort', abortHandler);
+    
+    timeoutId = setTimeout(() => {
       timedOut = true;
       abortHandler();
     }, timeoutMs);
@@ -344,7 +352,9 @@ export class ShellTool extends BaseTool<ShellToolParams, ToolResult> {
     try {
       await new Promise((resolve) => shell.on('exit', resolve));
     } finally {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       abortSignal.removeEventListener('abort', abortHandler);
     }
 
